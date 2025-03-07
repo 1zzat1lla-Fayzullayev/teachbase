@@ -12,14 +12,14 @@ function Managers() {
            <div className="cr flex flexc-col">
               <h4>
                 <Link className="text-2xl" href="#">
-                  Менеджерам обучения
+                Категория 1
                 </Link>
               </h4>
             </div>
             <div className="content flex flex-row flex-wrap gap-4 mt-2">
               <div className="carde max-w-[370px] border rounded-2xl flex flex-col dark:text-gray-100 bg-white dark:bg-[#111] drop-shadow-lg p-5 border-gray-200">
-                <h5 className="text-xl font-light mb-5">Курсы</h5>
-                <p className="text-sm mb-5">
+                <h5 className="text-xl font-light mb-5">Продукт 01</h5>
+                <p className="text-sm leading-normal mb-5">
                   Одна из базовых функций платформы - возможность создавать и
                   запускать обучение по курсам. Которые могут состоять
                   практически из любого вида контента: аудио, видео, документы,

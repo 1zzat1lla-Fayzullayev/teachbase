@@ -1,3 +1,5 @@
+import Footer from "./components/footer";
+import Navbar from "./components/navbar";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -7,7 +9,12 @@ export default function RootLayout({ children }) {
       className="dark"
       style={{ scrollBehavior: "smooth", colorScheme: "dark" }}
     >
-      <body className={`antialiased`}>{children}</body>
+      <body className={`antialiased`}>
+      <Navbar />
+        {children}
+        
+        <Footer />
+        </body>
     </html>
   );
 }
