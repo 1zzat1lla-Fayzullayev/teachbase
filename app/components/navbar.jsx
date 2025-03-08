@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Wrapper from "../layout/wrapper";
+import Link from "next/link";
 
 function Navbar() {
   const [value, setValue] = React.useState("");
@@ -51,7 +52,9 @@ function Navbar() {
       <div className="bg-transparent h-[65px]">
         <Wrapper>
           <div className="px-6 fixed w-full left-0 top-0 py-[15px] border-b border-b-[#9ca3af33] flex justify-between items-center z-[999]" style={{backdropFilter: "blur(40px)"}}>
+            <Link href={"/"}>
             <img src="/logo.svg" className="cursor-pointer" />
+            </Link>
             <ul className="items-center gap-5 hidden md:flex">
               <li>
                 <a

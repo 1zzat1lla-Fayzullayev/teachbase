@@ -4,7 +4,7 @@ import { SidebarProvider } from './components/sidebarProvider'
 const Page = () => {
   return (
     <SidebarProvider>
-         <div>Page 1</div>
+         <div className='mt-3 text-md'>Выберите материал !</div>
     </SidebarProvider>
   )
 }

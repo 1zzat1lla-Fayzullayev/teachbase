@@ -1,88 +1,106 @@
 "use client";
+import React, { useState } from "react";
 
-import { useState } from "react";
-import { Home, Inbox, Calendar, Search, Settings, Menu } from "lucide-react";
-import Link from "next/link";
-
-const menuItems = [
-  { title: "Home", icon: Home, path: "/" },
-  { title: "Inbox", icon: Inbox, path: "/inbox" },
-  { title: "Calendar", icon: Calendar, path: "/calendar" },
-  { title: "Search", icon: Search, path: "/search" },
-  { title: "Settings", icon: Settings, path: "/settings" },
+const data = [
+  {
+    title: "Курсы",
+    items: [
+      {
+        title:
+          "Потоки в курсе: Анкета для самостоятельной регистрации учеников в курс",
+      },
+    ],
+  },
 ];
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+export default function Sidebar({ isOpen, setIsOpen }) {
+  const [openIndices, setOpenIndices] = useState([]);
+
+  const toggleAccordion = (index) => {
+    if (openIndices.includes(index)) {
+      setOpenIndices(openIndices.filter((i) => i !== index));
+    } else {
+      setOpenIndices([...openIndices, index]);
+    }
+  };
+
+  const [openFat, setOpenFat] = useState([]);
+
+  const toogleOpenFather = (index) => {
+    if (openFat.includes(index)) {
+      setOpenFat(openFat.filter((i) => i !== index));
+    } else {
+      setOpenFat([...openFat, index]);
+    }
+  };
 
   return (
     <div
       className={`${
         isOpen ? "w-64" : "w-20"
-      } transition-all bg-[#111111] text-white fixed left-0 top-[65px] h-[calc(100vh-65px)] flex flex-col`}
+      } transition-all bg-[#111111] text-white sticky left-0 top-[65px] h-[calc(100vh-65px)] flex flex-col`}
     >
-      {/* Toggle Button */}
-
-      {/* Menu Items */}
-      {/* <nav className="flex-1">
-        {menuItems.map(({ title, icon: Icon, path }) => (
-          <Link
-            key={title}
-            href={path}
-            className="flex items-center gap-4 p-3 rounded hover:bg-neutral-800 transition"
-          >
-            {isOpen && <Icon size={24} />}
-            {isOpen && <span>{title}</span>}
-          </Link>
-        ))}
-      </nav> */}
-
       <div className="lc overflow-y-auto overflow-x-hidden p-4 grow md:h-[calc(100vh-var(--nextra-navbar-height)-var(--nextra-menu-height))]">
-        <div className="lc_child transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300">
-          <div className="lc_child_nevara transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100">
-            <ul className="flex flex-col gap-1 max-md:hidden">
-              <li>
-                <button className="items-center justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50">
-                  Курсы
-                  <svg
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"
+        <div className="lc_child min-w-[224px] transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300">
+          <div className="lc_child_nevara min-w-[224px] transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100">
+            <ul
+              className={`flex-col min-w-[224px] gap-1 !max-md:hidden ${
+                isOpen ? "flex" : "hidden"
+              }`}
+            >
+              {data.map((item, index) => (
+                <li key={index}>
+                  <button
+                    onClick={() => toogleOpenFather(index)}
+                    className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                      className="origin-center transition-transform rtl:-rotate-180"
-                    ></path>
-                  </svg>
-                </button>
+                    {item.title}
+                    <svg
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className={` ${openFat.includes(index) ? "rotate-90":"" } transition-transform h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                        className="origin-center transition-transform rtl:-rotate-180"
+                      ></path>
+                    </svg>
+                  </button>
 
-                <div className="cild transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300">
-                  <div className="child_cild transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100 ltr:pr-0 rtl:pl-0 pt-1">
-                    <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
-                      <li className="flex flex-col gap-1">
-                        <a
-                          className="flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
-                          href="#"
-                        >
-                          Потоки в курсе: Анкета для самостоятельной регистрации
-                          учеников в курс
-                        </a>
-                      </li>
-                    </ul>
+                  <div  className={`cild ${openFat.includes(index) ? "":"h-[0px]"} transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}>
+                    <div className="child_cild transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100 ltr:pr-0 rtl:pl-0 pt-1">
+                      <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
+                        {item.items.map((subItem, subIndex) => (
+                          <li key={subIndex} className="flex flex-col gap-1">
+                            <a
+                              className={`${openIndices.includes(subIndex) ? "!bg-[#172229] !text-[#0282d9] font-semibold":""} flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50`}
+                              onClick={() => toggleAccordion(subIndex)}
+                              href="#"
+                            >
+                              {subItem.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              </li>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-t-neutral-800 py-4 flex flex-row items-center mx-4 gap-2 text-sm text-center text-neutral-400">
+      <div
+        className={`mt-auto py-4 flex ${
+          isOpen ? "flex-row border-t border-t-neutral-800" : "flex-col"
+        } gap-2 items-center mx-4 text-sm text-center text-neutral-400`}
+      >
         {/* &copy; {new Date().getFullYear()} My App */}
 
         <button
@@ -102,7 +120,7 @@ export default function Sidebar() {
                 clipRule="evenodd"
               ></path>
             </svg>
-            <span>Русский</span>
+            {isOpen && <span>Русский</span>}
           </span>
         </button>
 
@@ -131,7 +149,7 @@ export default function Sidebar() {
                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
               ></path>
             </svg>
-            <span className="md:hidden">Системная</span>
+            {isOpen && <span className="md:hidden">Системная</span>}
           </div>
         </button>
 
@@ -151,7 +169,6 @@ export default function Sidebar() {
             ></path>
           </svg>
         </button>
-        {/* </button> */}
       </div>
     </div>
   );

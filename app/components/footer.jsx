@@ -1,9 +1,17 @@
+"use client";
+
 import React from "react";
+import { usePathname } from 'next/navigation'
 
 const Footer = () => {
+
+  const pathname = usePathname();
+  
   return (
     <footer className="bg-gray-100 dark:bg-neutral-900  print:bg-transparent">
-      <div className="tp mx-auto flex max-w-[90rem] gap-2 py-2 px-4">
+      {
+        pathname === "/" && (
+          <div className="tp mx-auto flex max-w-[90rem] gap-2 py-2 px-4">
         <button className="text-gray-600 transition-all font-medium text-xs text-left px-2 rounded-md h-7 cursor-pointer hover:bg-gray-200 dark:hover:bg-neutral-800 dark:text-gray-400 dark:hover:text-gray-100">
           <div className="flex items-center gap-2">
             <svg viewBox="2 2 16 16" width="12" height="12" fill="currentColor">
@@ -37,6 +45,8 @@ const Footer = () => {
           </div>
         </button>
       </div>
+        )
+      }
       <hr className="dark:border-neutral-800" />
 
       <div className="mx-auto flex max-w-[90rem] justify-center py-12 px-6 text-gray-600 dark:text-gray-400 md:justify-start">
