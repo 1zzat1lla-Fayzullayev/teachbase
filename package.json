@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
+    "github-markdown-css": "^5.8.1",
     "lucide-react": "^0.477.0",
     "next": "15.2.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "rehype-starry-night": "^2.2.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
