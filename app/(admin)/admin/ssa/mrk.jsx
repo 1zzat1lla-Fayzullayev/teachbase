@@ -30,7 +30,7 @@ export default function MarkdownEditor() {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Write your markdown here..."
-      />
+      /> 
       
       <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
         <h2 className="text-lg prose prose-invert font-semibold">Предварительный просмотр страницы</h2>

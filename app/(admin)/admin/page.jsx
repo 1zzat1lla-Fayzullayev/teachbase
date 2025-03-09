@@ -64,11 +64,11 @@ const Page = () => {
   
 
   const addCatalog = async () => {
-    if (!newItem.trim() || !newDescription.trim()) return;
+    if (!newItem.trim()) return;
 
     const { data, error } = await supabase
       .from("katalog")
-      .insert([{ title: newItem, description: newDescription }]);
+      .insert([{ title: newItem, description: "" }]);
 
     if (error) {
       console.error("Ошибка при добавлении каталога:", error.message);
@@ -79,20 +79,19 @@ const Page = () => {
       ...prev,
       Каталог: [
         ...prev.Каталог,
-        { title: newItem, description: newDescription },
+        { title: newItem, description: "" },
       ],
     }));
     setNewItem("");
-    setNewDescription("");
     setModalOpen(false);
   };
 
   const addProduct = async () => {
-    if (!newItem.trim() || !selectedCatalog) return;
+    if (!newItem.trim() || !selectedCatalog || !newDescription.trim()) return;
 
     const { data, error } = await supabase
       .from("product")
-      .insert([{ title: newItem, katolog_id: selectedCatalog }]);
+      .insert([{ title: newItem, katolog_id: selectedCatalog, description: newDescription }]);
 
     if (error) {
       console.error("Ошибка при добавлении продукта:", error.message);
@@ -103,11 +102,12 @@ const Page = () => {
       ...prev,
       Продукты: [
         ...prev.Продукты,
-        { title: newItem, katolog_id: selectedCatalog },
+        { title: newItem, katolog_id: selectedCatalog, description: newDescription },
       ],
     }));
     setNewItem("");
     setSelectedCatalog("");
+    setNewDescription("");
     setModalOpen(false);
   };
 
@@ -302,7 +302,7 @@ const Page = () => {
                 onChange={(e) => setNewItem(e.target.value)}
               />
             )}
-            {modalType === "Каталог" && (
+            {modalType === "Продукты" && (
               <input
                 type="text"
                 placeholder="Описание"
@@ -446,7 +446,7 @@ const Page = () => {
                   }
                 />
 
-                {activeTable === "Каталог" && (
+                {activeTable === "Продукты" && (
                  <>
                   <p>Описание</p>
                   <input
