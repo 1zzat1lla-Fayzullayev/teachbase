@@ -8,6 +8,8 @@ function AboutPage() {
 
   const [headings, setHeadings] = useState([]);
 
+  const [activeHeading, setActiveHeading] = useState(""); // Track active heading
+
   useEffect(() => {
     const fetchMaterial = async () => {
       const { data, error } = await supabase.from("material").select("*");
@@ -30,6 +32,30 @@ function AboutPage() {
 
     setHeadings(extractedHeadings);
   }, [content]);
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      let currentHeading = "";
+
+      for (const heading of headings) {
+        const element = document.getElementById(slugify(heading));
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top >= 0 && rect.top <= 200) {
+            currentHeading = heading;
+            break;
+          }
+        }
+      }
+
+      setActiveHeading(currentHeading);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [headings]);
+
 
   const scrollToHeading = (id) => {
     const element = document.getElementById(id);
@@ -55,7 +81,7 @@ function AboutPage() {
             onClick={() => scrollToHeading(slugify(link))}
             key={index}
           >
-            <a className="block text-[15px] text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
+            <a className={`block text-[15px] text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300`}>
               {link}
             </a>
           </li>
