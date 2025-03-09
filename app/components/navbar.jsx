@@ -91,7 +91,7 @@ function Navbar() {
                 (item) => (
                   <li key={item}>
                     <a
-                      href="#"
+                      href="/catalog/new/test"
                       className="text-[#9ca3af] text-nowrap text-[14px] hover:text-white"
                     >
                       {item}

@@ -318,8 +318,8 @@ const Page = () => {
                 onChange={(e) => setSelectedCatalog(e.target.value)}
               >
                 <option value="">Выберите каталог</option>
-                {items["Каталог"].map((cat) => (
-                  <option key={cat.id} value={cat.id}>
+                {items["Каталог"].map((cat, index) => (
+                  <option key={index} value={cat.id}>
                     {cat.title}
                   </option>
                 ))}

@@ -15,7 +15,7 @@ export const SidebarProvider = ({ children }) => {
       <div className="flex flex-row">
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
         <div className="flex flex-row justify-between w-full">
-          <div>
+          <div className="w-full">
             <Breadcrumb />
             {children}
           </div>
