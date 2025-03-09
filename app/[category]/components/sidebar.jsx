@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     <div
       className={`${
         isOpen ? "w-64" : "w-20"
-      } transition-all bg-[#111111] text-white sticky left-0 top-[65px] h-[calc(100vh-65px)] flex flex-col`}
+      } transition-all bg-[#111111] text-white sticky left-0 top-[65px] h-[calc(100vh-65px)] md:flex flex-col hidden`}
     >
       <div className="lc overflow-y-auto overflow-x-hidden p-4 grow md:h-[calc(100vh-var(--nextra-navbar-height)-var(--nextra-menu-height))]">
         <div className="lc_child min-w-[224px] transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300">
