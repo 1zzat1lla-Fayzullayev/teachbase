@@ -33,3 +33,25 @@ body::-webkit-scrollbar-thumb:hover {
 body::-webkit-scrollbar-corner {
   background-color: #424242; /* Color for the bottom-right corner of the scrollbar */
 }
+
+.burger {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.burger.open div:nth-child(1) {
+  transform: rotate(45deg) translateY(10px);
+}
+
+.burger.open div:nth-child(2) {
+  opacity: 0;
+}
+
+.burger.open div:nth-child(3) {
+  transform: rotate(-45deg) translateY(-10px);
+}

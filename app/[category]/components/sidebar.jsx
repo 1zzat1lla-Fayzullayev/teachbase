@@ -52,14 +52,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 <li key={index}>
                   <button
                     onClick={() => toogleOpenFather(index)}
-                    className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+                    className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
                   >
                     {item.title}
                     <svg
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
-                      className={` ${openFat.includes(index) ? "rotate-90":"" } transition-transform h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5`}
+                      className={` ${
+                        openFat.includes(index) ? "rotate-90" : ""
+                      } transition-transform h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5`}
                     >
                       <path
                         strokeLinecap="round"
@@ -71,13 +73,21 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     </svg>
                   </button>
 
-                  <div  className={`cild ${openFat.includes(index) ? "":"h-[0px]"} transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}>
+                  <div
+                    className={`cild ${
+                      openFat.includes(index) ? "" : "h-[0px]"
+                    } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
+                  >
                     <div className="child_cild transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100 ltr:pr-0 rtl:pl-0 pt-1">
                       <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
                         {item.items.map((subItem, subIndex) => (
                           <li key={subIndex} className="flex flex-col gap-1">
                             <a
-                              className={`${openIndices.includes(subIndex) ? "!bg-[#172229] !text-[#0282d9] font-semibold":""} flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50`}
+                              className={`${
+                                openIndices.includes(subIndex)
+                                  ? "!bg-[#172229] !text-[#0282d9] font-semibold"
+                                  : ""
+                              } flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50`}
                               onClick={() => toggleAccordion(subIndex)}
                               href="#"
                             >
@@ -173,4 +183,3 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     </div>
   );
 }
-// Compare this snippet from teachbase/app/components/sidebar.jsx:
