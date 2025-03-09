@@ -9,7 +9,7 @@ export default function RootLayout({ children }) {
       className="dark"
       style={{ scrollBehavior: "smooth", colorScheme: "dark" }}
     >
-      <body className={`antialiased`}>
+      <body className={`antialiased min-h-screen flex flex-col`}>
       <Navbar />
         {children}
         

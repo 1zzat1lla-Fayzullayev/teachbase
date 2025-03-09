@@ -8,7 +8,7 @@ const Footer = () => {
   const pathname = usePathname();
   
   return (
-    <footer className="bg-gray-100 dark:bg-neutral-900  print:bg-transparent">
+    <footer className="bg-gray-100 mt-auto dark:bg-neutral-900  print:bg-transparent">
       {
         pathname === "/" && (
           <div className="tp mx-auto flex max-w-[90rem] gap-2 py-2 px-4">

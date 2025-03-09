@@ -1,8 +1,13 @@
 import React from "react";
 import Wrapper from "../layout/wrapper";
 import Link from "next/link";
+import Chatbox from "./chatbox";
+import Script from "next/script";
 
 function Managers() {
+
+
+  
   return (
     <>
       <Wrapper>
@@ -40,7 +45,16 @@ function Managers() {
            </div>
           </div>
         </div>
+
+      
       </Wrapper>
+
+
+      <Script
+      id="messenger-widget-b"
+      src="https://cdn.botpenguin.com/website-bot.js"
+      strategy="lazyOnload"
+    >67cd357c0ee8663aeac36eb0,67cd355cc999013c53c9221e</Script>
     </>
   );
 }
