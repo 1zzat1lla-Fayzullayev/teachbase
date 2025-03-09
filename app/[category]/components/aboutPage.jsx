@@ -8,7 +8,10 @@ function AboutPage() {
 
   const [headings, setHeadings] = useState([]);
 
-  const [activeHeading, setActiveHeading] = useState(""); // Track active heading
+  const [activeHeading, setActiveHeading] = useState("");
+
+  const [isVisible, setIsVisible] = useState(false);
+
 
   useEffect(() => {
     const fetchMaterial = async () => {
@@ -38,58 +41,92 @@ function AboutPage() {
     const handleScroll = () => {
       let currentHeading = "";
 
-      for (const heading of headings) {
-        const element = document.getElementById(slugify(heading));
+      for (let i = 0; i < headings.length; i++) {
+        const element = document.getElementById(slugify(headings[i]));
+        const nextElement = document.getElementById(slugify(headings[i + 1])); // Next heading
+
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top >= 0 && rect.top <= 200) {
-            currentHeading = heading;
+          const nextRect = nextElement ? nextElement.getBoundingClientRect() : null;
+
+          // Keep the heading active until the next one enters the screen
+          if (rect.top <= 200 && (!nextRect || nextRect.top > 200)) {
+            currentHeading = headings[i];
             break;
           }
         }
       }
 
-      setActiveHeading(currentHeading);
+      setActiveHeading(slugify(currentHeading));
+
+      if (window.scrollY > 330) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [headings]);
 
-
   const scrollToHeading = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 65; 
+  
+      window.scrollTo({
+        top: element.offsetTop - navbarHeight - 20,
+        behavior: "smooth",
+      });
     }
   };
+  
 
   const scrollToTop = () => {
-    const element = document.getElementById('idVverx');
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    
+    
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+      setActiveHeading("");
+    
   };
-// idVverx
+
+
   return (
     <div className="bg-transparent sticky top-[65px] right-0 w-[250px] h-[calc(100vh-65px)] p-4 hidden xl:block">
-      <p className="text-[15px] font-bold">На этой странице</p>
+      <p className="mb-4 font-semibold tracking-tight">На этой странице</p>
       <ul className="space-y-1">
         {headings.map((link, index) => (
           <li
-            className="cursor-pointer"
+            className="cursor-pointer my-2 scroll-my-6 scroll-py-6"
             onClick={() => scrollToHeading(slugify(link))}
             key={index}
           >
-            <a className={`block text-[15px] text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300`}>
+            <a
+              className={`font-semibold inline-block ${
+                activeHeading == slugify(link) ? "!text-[#008ae6]" : ""
+              } text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 contrast-more:text-gray-900 contrast-more:underline contrast-more:dark:text-gray-50 w-full break-words`}
+            >
               {link}
             </a>
+            {/* <a
+              className={`block text-[15px] ${
+                activeHeading == slugify(link) ? "!text-[#008ae6]" : ""
+              } font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300`}
+            >
+              
+            </a> */}
           </li>
         ))}
       </ul>
       <div className="mt-8 border-t bg-white pt-8 shadow-[0_-12px_16px_white] dark:bg-[#111111] dark:shadow-[0_-12px_16px_#111] sticky bottom-0 flex flex-col items-start gap-2 pb-8 dark:border-neutral-800 contrast-more:border-t contrast-more:border-neutral-400 contrast-more:shadow-none contrast-more:dark:border-neutral-400">
-        <button
-        onClick={()=> scrollToTop()}
+       {
+        isVisible && (
+          <button
+          onClick={() => scrollToTop()}
           aria-hidden="true"
           className="flex cursor-pointer items-center gap-1.5 transition text-xs font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 contrast-more:text-gray-800 contrast-more:dark:text-gray-50"
         >
@@ -108,6 +145,8 @@ function AboutPage() {
             ></path>
           </svg>
         </button>
+        )
+       }
       </div>
     </div>
   );
