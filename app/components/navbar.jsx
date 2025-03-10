@@ -134,7 +134,7 @@ function Navbar() {
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="w-[25px] h-[2px] rounded-full bg-white transition-all"
+                  className="w-[25px] h-[2px] rounded-full bg-black dark:bg-white transition-all"
                 ></div>
               ))}
             </div>
@@ -143,7 +143,7 @@ function Navbar() {
       </div>
 
       <div
-        className={`fixed inset-0 z-[998] bg-[#111111] bg-opacity-80 transform ${
+        className={`fixed inset-0 z-[998] bg-white dark:bg-[#111111] bg-opacity-80 transform ${
           isMobileOpen ? "translate-y-0" : "-translate-y-full"
         } transition-transform duration-300 flex px-[10px] flex-col w-full pt-[80px] gap-6`}
       >
@@ -154,7 +154,7 @@ function Navbar() {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Найти..."
-            className="px-3 py-[7px] transition-all text-sm border-none w-full rounded-lg bg-[#f9fafb1a] focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-[#0000000d] dark:bg-[#f9fafb1a] px-3 py-[7px] transition-all text-sm border-none w-full rounded-lg focus:bg-[#0000000d] dark:focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <ul className="flex flex-col gap-1 nextra-menu-mobile md:hidden mt-3">
             {data.map((item, index) => (

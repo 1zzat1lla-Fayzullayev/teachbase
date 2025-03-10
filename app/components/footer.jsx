@@ -136,13 +136,13 @@ const Footer = () => {
             {showM == 2 && (
               <ul
                 className="z-20 absolute top-[-108px] left-[-5px] max-h-64 overflow-auto rounded-md ring-1 ring-black/5 bg-white py-1 text-sm shadow-lg dark:ring-white/20 dark:bg-neutral-800"
-                ariaLabelledby="headlessui-listbox-button-:Rkt6:"
-                ariaOrientation="vertical"
+                aria-labelledby="headlessui-listbox-button-:Rkt6:"
+                aria-orientation="vertical"
                 id="headlessui-listbox-options-:r0:"
                 role="listbox"
                 tabIndex="0"
                 
-                dataPopperPlacement="top-start"
+                datapopperplacement="top-start"
                 // style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(105px, -167px, 0px); min-width: 96.2656px;"
               >
                 <li
@@ -163,7 +163,7 @@ const Footer = () => {
                         fill="currentColor"
                       >
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                           clipRule="evenodd"
                         ></path>
@@ -189,7 +189,7 @@ const Footer = () => {
                         fill="currentColor"
                       >
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                           clipRule="evenodd"
                         ></path>
@@ -215,7 +215,7 @@ const Footer = () => {
                         fill="currentColor"
                       >
                         <path
-                          fill-rule="evenodd"
+                          fillRule="evenodd"
                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                           clipRule="evenodd"
                         ></path>
