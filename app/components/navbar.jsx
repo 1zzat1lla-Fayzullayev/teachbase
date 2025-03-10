@@ -9,6 +9,13 @@ function Navbar() {
   const searchInputRef = useRef(null);
   const [openIndices, setOpenIndices] = useState([]);
   const [openFat, setOpenFat] = useState([]);
+  const [logo, setLogo] = useState("/logo.svg");
+
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setLogo(isDark ? "/logo.svg" : "/lightLogo.svg");
+  }, []);
 
   const data = [
     {
@@ -84,7 +91,7 @@ function Navbar() {
         <Wrapper>
           <div className="px-6 fixed w-full left-0 top-0 py-[15px] border-b border-b-[#9ca3af33] flex justify-between items-center z-[999] backdrop-blur-[40px]">
             <Link href="/">
-              <img src="/logo.svg" className="cursor-pointer" alt="Logo" />
+              <img src={logo} className="cursor-pointer" alt="Logo" />
             </Link>
             <ul className="items-center gap-5 hidden md:flex">
               {["Категория 1", "Категория 2", "Категория 3", "Категория 4"].map(
@@ -92,7 +99,7 @@ function Navbar() {
                   <li key={item}>
                     <a
                       href="/catalog/new/test"
-                      className="text-[#9ca3af] text-nowrap text-[14px] hover:text-white"
+                      className="text-[#4b5563] dark:text-[#9ca3af] text-nowrap text-[14px] hover:text-black dark:hover:text-white"
                     >
                       {item}
                     </a>
@@ -106,7 +113,7 @@ function Navbar() {
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                   placeholder="Найти..."
-                  className="px-3 py-[7px] transition-all text-sm border-none lg:w-[256px] rounded-lg bg-[#f9fafb1a] focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="bg-[#0000000d] dark:bg-[#f9fafb1a] px-3 py-[7px] transition-all text-sm border-none lg:w-[256px] rounded-lg focus:bg-[#0000000d] dark:focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <kbd className="absolute top-0 my-1.5 select-none ltr:right-1.5 rtl:left-1.5 h-5 rounded bg-white px-1.5 font-mono text-[10px] font-medium text-gray-500 border dark:border-gray-100/20 dark:bg-[#111111]/50 contrast-more:border-current contrast-more:text-current contrast-more:dark:border-current items-center gap-1 pointer-events-none hidden sm:flex opacity-100">
                   {searchValue ? "ESC" : "CTRL K"}
