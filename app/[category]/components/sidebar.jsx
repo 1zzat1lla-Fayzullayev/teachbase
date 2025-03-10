@@ -1,20 +1,18 @@
 "use client";
-import React, { useState } from "react";
-
-const data = [
-  {
-    title: "Курсы",
-    items: [
-      {
-        title:
-          "Потоки в курсе: Анкета для самостоятельной регистрации учеников в курс",
-      },
-    ],
-  },
-];
+import { supabase } from "@/app/supabase/store";
+import React, { useEffect, useState } from "react";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
+  const [catalogs, setCatalogs] = useState([]);
   const [openIndices, setOpenIndices] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("katalog").select("*");
+      if (!error) setCatalogs(data);
+    };
+    fetchData();
+  }, []);
 
   const toggleAccordion = (index) => {
     if (openIndices.includes(index)) {
@@ -48,11 +46,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 isOpen ? "flex" : "hidden"
               }`}
             >
-              {data.map((item, index) => (
-                <li key={index}>
+              {catalogs.map((item, index) => (
+                <li key={item.id || index}>
                   <button
                     onClick={() => toogleOpenFather(index)}
-                    className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
+                    className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50"
                   >
                     {item.title}
                     <svg
@@ -73,21 +71,24 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     </svg>
                   </button>
 
-                  <div
-                    className={`cild ${
-                      openFat.includes(index) ? "" : "h-[0px]"
-                    } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
-                  >
-                    <div className="child_cild transition-opacity duration-500 ease-in-out motion-reduce:transition-none opacity-100 ltr:pr-0 rtl:pl-0 pt-1">
+                  {item.description && Array.isArray(item.description) && (
+                    <div
+                      className={`cild ${
+                        openFat.includes(index) ? "" : "h-[0px]"
+                      } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
+                    >
                       <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
-                        {item.items.map((subItem, subIndex) => (
-                          <li key={subIndex} className="flex flex-col gap-1">
+                        {item.description.map((subItem, subIndex) => (
+                          <li
+                            key={subItem.id || subIndex}
+                            className="flex flex-col gap-1"
+                          >
                             <a
                               className={`${
                                 openIndices.includes(subIndex)
                                   ? "!bg-[#172229] !text-[#0282d9] font-semibold"
                                   : ""
-                              } flex rounded px-2 py-1.5 text-sm transition-colors [word-break:break-word] cursor-pointer [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50`}
+                              } flex rounded px-2 py-1.5 text-sm transition-colors cursor-pointer`}
                               onClick={() => toggleAccordion(subIndex)}
                               href="#"
                             >
@@ -97,7 +98,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         ))}
                       </ul>
                     </div>
-                  </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -108,10 +109,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       {/* Footer */}
       <div
         className={`mt-auto py-4 flex ${
-          isOpen ? "flex-row border-t border-t-gray-200 dark:border-t-neutral-800" : "flex-col"
+          isOpen
+            ? "flex-row border-t border-t-gray-200 dark:border-t-neutral-800"
+            : "flex-col"
         } gap-2 items-center mx-4 text-sm text-center text-neutral-400`}
       >
-
         <button
           title="Change language"
           className="h-7 cursor-pointer rounded-md px-2 text-left text-xs font-medium text-gray-600 transition-colors dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 grow"

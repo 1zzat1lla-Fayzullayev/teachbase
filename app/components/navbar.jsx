@@ -5,9 +5,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 
 function Navbar() {
-
   const { theme, setTheme } = useTheme();
-
 
   const [searchValue, setSearchValue] = useState("");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -16,9 +14,7 @@ function Navbar() {
   const [openFat, setOpenFat] = useState([]);
   const [logo, setLogo] = useState("/logo.svg");
 
-
   useEffect(() => {
- 
     setLogo(theme === "dark" ? "/logo.svg" : "/lightLogo.svg");
   }, []);
 
