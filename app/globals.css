@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 /* body {
   --tw-bg-opacity: 1;
   background-color: rgba(17, 17, 17, var(--tw-bg-opacity));

@@ -2,8 +2,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import Wrapper from "../layout/wrapper";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 function Navbar() {
+
+  const { theme, setTheme } = useTheme();
+
+
   const [searchValue, setSearchValue] = useState("");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const searchInputRef = useRef(null);
@@ -13,8 +18,8 @@ function Navbar() {
 
 
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setLogo(isDark ? "/logo.svg" : "/lightLogo.svg");
+ 
+    setLogo(theme === "dark" ? "/logo.svg" : "/lightLogo.svg");
   }, []);
 
   const data = [
