@@ -282,7 +282,7 @@ const Page = () => {
 
               {activeTable && selectedCatalogF && (
                 <select
-                  className="w-full p-2 border cursor-pointer disabled:cursor-not-allowed border-gray-700 rounded mb-4 bg-gray-800"
+                  className="w-full p-2 border cursor-pointer disabled:cursor-not-allowed text-white border-gray-700 rounded mb-4 bg-gray-800"
                   value={selectedProduct}
                   onChange={(e) => setSelectedProduct(e.target.value)}
                   disabled={activeTable !== "Материалы"}
@@ -330,7 +330,7 @@ const Page = () => {
                   filteredItems.map((item) => (
                     <li
                       key={item.id}
-                      className="py-1 px-2 bg-gray-800 rounded mb-1"
+                      className="py-1 px-2 text-white bg-gray-800 rounded mb-1"
                     >
                       {item.title}
                       <span className="flex gap-2">
