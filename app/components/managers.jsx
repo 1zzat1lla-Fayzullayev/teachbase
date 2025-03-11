@@ -7,6 +7,7 @@ import { supabase } from "../supabase/store";
 
 function Managers() {
   const [products, setProducts] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [katalog, setKatalog] = useState([]);
   const [catalogNames, setCatalogNames] = useState({});
 
@@ -20,9 +21,9 @@ function Managers() {
       } else {
         setProducts(data);
         setGroupedProducts(groupByCatalog(data));
-        console.log(groupByCatalog(data));
+        console.log("group:",groupByCatalog(data));
 
-        console.log(data);
+        console.log("lk:",data);
       }
     };
 
@@ -43,8 +44,23 @@ function Managers() {
       }
     };
 
+    const fetchMaterial = async ()=> {
+      const { data, error } = await supabase.from("material").select("*");
+      if (error) {
+        console.error("Error fetching products:", error);
+      } else {
+        
+        console.log("mat:",data);
+        
+        
+        setMaterials(data)
+      }
+    };
+    
+
     fetchKatalog();
     fetchProducts();
+    fetchMaterial()
   }, []);
 
   function groupByCatalog(products) {
@@ -93,9 +109,9 @@ function Managers() {
                       </p>
                       <Link
                         className="uppercase mt-auto text-blue-400 font-bold hover:opacity-70"
-                        href={`/${katalogId}`}
+                        href={`/${katalogId}/${product.id}/${materials.find((imn)=> imn.product_id == product.id)?.id}`}
                       >
-                        {product.description.length} статьи
+                        {materials.filter((imn) => imn.product_id === product.id).length} статьи
                       </Link>
                     </div>
                   ))}
