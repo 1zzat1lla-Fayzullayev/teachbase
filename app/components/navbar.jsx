@@ -1,20 +1,33 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useTransition } from "react";
 import Wrapper from "../layout/wrapper";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import { searchMaterials } from "../lib/action";
+import { useRouter } from "next/navigation";
 
 function Navbar() {
   const { theme, setTheme } = useTheme();
 
+  const router = useRouter();
   const [searchValue, setSearchValue] = useState("");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const searchInputRef = useRef(null);
   const [openIndices, setOpenIndices] = useState([]);
   const [openFat, setOpenFat] = useState([]);
-  const [logo, setLogo] = useState("/logo.svg");
+  const [results, setResults] = useState([]);
+  const [isPending, startTransition] = useTransition();
 
+  const handleSearch = async (e) => {
+    // e.preventDefault();
+    if (!e) return;
 
+    startTransition(async () => {
+      const data = await searchMaterials(e);
+      setResults(data);
+      console.log("da:", data);
+    });
+  };
 
   const data = [
     {
@@ -90,7 +103,11 @@ function Navbar() {
         <Wrapper>
           <div className="px-6 fixed w-full left-0 top-0 py-[15px] border-b border-b-[#9ca3af33] flex justify-between items-center z-[999] backdrop-blur-[40px]">
             <Link href="/">
-              <img src={theme == "light" ? "/lightLogo.svg" : "/logo.svg"} className="cursor-pointer" alt="Logo" />
+              <img
+                src={theme == "light" ? "/lightLogo.svg" : "/logo.svg"}
+                className="cursor-pointer"
+                alt="Logo"
+              />
             </Link>
             <ul className="items-center gap-5 hidden md:flex">
               {["Категория 1", "Категория 2", "Категория 3", "Категория 4"].map(
@@ -110,13 +127,50 @@ function Navbar() {
                   ref={searchInputRef}
                   type="text"
                   value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
+                  onChange={(e) => {
+                    setSearchValue(e.target.value),
+                      handleSearch(e.target.value);
+                  }}
                   placeholder="Найти..."
                   className="bg-[#0000000d] dark:bg-[#f9fafb1a] px-3 py-[7px] transition-all text-sm border-none lg:w-[256px] rounded-lg focus:bg-[#0000000d] dark:focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <kbd className="absolute top-0 my-1.5 select-none ltr:right-1.5 rtl:left-1.5 h-5 rounded bg-white px-1.5 font-mono text-[10px] font-medium text-gray-500 border dark:border-gray-100/20 dark:bg-[#111111]/50 contrast-more:border-current contrast-more:text-current contrast-more:dark:border-current items-center gap-1 pointer-events-none hidden sm:flex opacity-100">
                   {searchValue ? "ESC" : "CTRL K"}
                 </kbd>
+
+                {(results.length == 0 && searchValue !== "") && (
+                  <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-full z-20 mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
+                    <span className="block select-none p-8 text-center text-sm text-gray-400">
+                      Ничего не найдено.
+                    </span>
+                  </ul>
+                )}
+
+                {(results.length > 0 && searchValue !== "") && (
+                  <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-full z-20 mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
+                    {results.map((item, index) => (
+                      <li
+                        key={index}
+                        className="mx-2.5 break-words rounded-md contrast-more:border hover:bg-[#3B82F6]/10 cursor-pointer hover:text-[#2563EB] contrast-more:border-[#3B82F6]"
+                      >
+                        <a 
+                          onClick={() => {(item.type === "material") && router.push(`/${item.katalog_id}/${item.product_id}/${item.id}`,  { shallow: true }), clearSearch()}}
+                        className="block scroll-m-12 px-2.5 py-2">
+                          <div
+                            className="text-base font-semibold leading-5"
+                            dangerouslySetInnerHTML={{ __html: item.title }}
+                          />
+                          {item.snippet && (
+                            <p
+                              className="mt-1 text-sm leading-[1.35rem] text-gray-600 dark:text-gray-400 contrast-more:dark:text-gray-50"
+                              dangerouslySetInnerHTML={{ __html: item.snippet }}
+                            />
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             </ul>
             <div

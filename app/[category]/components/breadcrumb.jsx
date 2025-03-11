@@ -14,7 +14,7 @@ const Breadcrumb = () => {
     >
       <ul className="nextra-breadcrumb mt-1.5 flex items-center gap-1 overflow-hidden text-sm text-gray-500 dark:text-gray-400 contrast-more:text-current">
         <li className="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis">
-          <Link href="/">Менеджерам обучения</Link>
+          <Link href="/">Категория 1</Link>
         </li>
         <svg
           fill="none"
@@ -37,11 +37,11 @@ const Breadcrumb = () => {
             <Fragment key={index}>
               <li className="whitespace-nowrap text-center transition-colors min-w-[24px] overflow-hidden text-ellipsis">
                 {isLast ? (
-                  <span className="text-white font-semibold">
+                  <span className="text-[#888f9b] dark:text-white font-semibold">
                     {decodeURIComponent(segment)}
                   </span>
                 ) : (
-                  <Link href={path} className="text-white hover:underline">
+                  <Link href={'#'} className="text-[#888f9b] dark:text-white hover:underline">
                     {decodeURIComponent(segment)}
                   </Link>
                 )}

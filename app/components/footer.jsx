@@ -51,7 +51,7 @@ const Footer = () => {
                 id="headlessui-listbox-options-:r0:"
                 role="listbox"
                 tabIndex="0"
-                dataHeadlessuiState="open"
+                
                 dataPopperPlacement="top-start"
                 // style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate3d(105px, -167px, 0px); min-width: 96.2656px;"
               >
@@ -62,7 +62,7 @@ const Footer = () => {
                   tabIndex="-1"
                   
                   aria-selected="false"
-                  dataHeadlessuiState=""
+                  
                   onClick={() =>   setShowM(0)}
                 >
                   русский

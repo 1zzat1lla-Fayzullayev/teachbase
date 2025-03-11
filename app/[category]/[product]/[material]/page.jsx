@@ -46,8 +46,8 @@ const Page = () => {
     }
   }, [material, selectedMaterials]);
 
-  if (error) return <p>Error loading material</p>;
-  if (!selectedMaterial) return <p>Loading...</p>;
+  if (error) return <p>Ошибка загрузки материала</p>;
+  if (!selectedMaterial) return <p>Загрузка...</p>;
 
   const currentIndex = selectedMaterials.findIndex((m) => m.id == material);
   const nextMaterial = selectedMaterials[currentIndex + 1];
@@ -62,7 +62,7 @@ const Page = () => {
               ? selectedMaterial.title
               : "Данные временно недоступны."}
           </h1>
-          <div className="markdown-body !bg-[#111] !p-0 prose prose-invert list-disc">
+          <div className="markdown-body !text-[#0f172b] dark:!text-white !bg-[#fff] dark:!bg-[#111] !p-0 prose prose-invert list-disc">
             <MarkdownHooks
               remarkPlugins={[remarkGfm, remarkHeadingIds]}
               rehypePlugins={[rehypeStarryNight]}
