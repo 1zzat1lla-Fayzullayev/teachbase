@@ -2,7 +2,7 @@
 import { supabase } from "@/app/supabase/store";
 import { EditIcon, TrashIcon, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 
 const Page = () => {
@@ -17,6 +17,7 @@ const Page = () => {
   const [newM, setNewM] = useState("");
   const [newMDesc, setNewMDesc] = useState(``);
   const [selectedCatalog, setSelectedCatalog] = useState("");
+  const [selectedCatalogF, setSelectedCatalogF] = useState("");
   const [selectedCatalogM, setSelectedCatalogM] = useState("");
   const [selectedPrdM, setSelectedPrdM] = useState("");
   const [items, setItems] = useState({
@@ -26,7 +27,7 @@ const Page = () => {
   });
   const refInput = useRef(null);
   const router = useRouter();
-
+  const [selectedProduct, setSelectedProduct] = useState("");
 
   const loggedIn = userPassword === "admin123";
 
@@ -83,22 +84,19 @@ const Page = () => {
     }));
     setNewItem("");
     setModalOpen(false);
-    router.refresh(); 
-
+    router.refresh();
   };
 
   const addProduct = async () => {
     if (!newItem.trim() || !selectedCatalog || !newDescription.trim()) return;
 
-    const { data, error } = await supabase
-      .from("product")
-      .insert([
-        {
-          title: newItem,
-          katolog_id: selectedCatalog,
-          description: newDescription,
-        },
-      ]);
+    const { data, error } = await supabase.from("product").insert([
+      {
+        title: newItem,
+        katolog_id: selectedCatalog,
+        description: newDescription,
+      },
+    ]);
 
     if (error) {
       console.error("Ошибка при добавлении продукта:", error.message);
@@ -120,8 +118,7 @@ const Page = () => {
     setSelectedCatalog("");
     setNewDescription("");
     setModalOpen(false);
-    router.refresh(); 
-
+    router.refresh();
   };
 
   const addMaterial = async () => {
@@ -158,7 +155,7 @@ const Page = () => {
     setSelectedCatalogM("");
     setSelectedPrdM("");
     setModalOpen(false);
-    router.refresh(); 
+    router.refresh();
   };
 
   const handleDelete = async (id, table, tbl) => {
@@ -184,6 +181,43 @@ const Page = () => {
       setModalOpenEdit(false);
     }
   };
+
+  const filterData = () => {
+    if (activeTable === "Продукты") {
+      return items["Продукты"].filter(
+        (product) => product.katolog_id == selectedCatalogF
+      );
+    } else if (activeTable === "Материалы") {
+      return items["Материалы"].filter(
+        (material) =>
+          material.katolog_id == selectedCatalogF &&
+          material.product_id == selectedProduct
+      );
+    }
+    return [];
+  };
+
+  const filterData2 = (
+    activeTab,
+    catalogId,
+    productId,
+    products,
+    materials
+  ) => {
+    if (activeTab === "Продукты") {
+      // Filter products based on the selected catalog
+      return products.filter((product) => product.katolog_id === catalogId);
+    } else if (activeTab === "Материалы") {
+      // Filter materials based on both catalog and product
+      return materials.filter(
+        (material) =>
+          material.katolog_id === catalogId && material.product_id === productId
+      );
+    }
+    return [];
+  };
+
+  const filteredItems = filterData();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -231,6 +265,39 @@ const Page = () => {
                 </button>
               </div>
 
+              {activeTable && activeTable !== "Каталог" && (
+                <select
+                  className="w-full mt-4 p-2 border rounded mb-4 bg-gray-800 text-white"
+                  value={selectedCatalogF}
+                  onChange={(e) => setSelectedCatalogF(e.target.value)}
+                >
+                  <option value="">Выберите каталог</option>
+                  {items["Каталог"].map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {activeTable && selectedCatalogF && (
+                <select
+                  className="w-full p-2 border cursor-pointer disabled:cursor-not-allowed border-gray-700 rounded mb-4 bg-gray-800"
+                  value={selectedProduct}
+                  onChange={(e) => setSelectedProduct(e.target.value)}
+                  disabled={activeTable !== "Материалы"}
+                >
+                  <option value="">Выберите продукт</option>
+                  {items["Продукты"]
+                    .filter((p) => p.katolog_id == selectedCatalogF)
+                    .map((prod) => (
+                      <option key={prod.id} value={prod.id}>
+                        {prod.title}
+                      </option>
+                    ))}
+                </select>
+              )}
+
               {activeTable === "Материалы" && (
                 <div className="flex flex-col text-sm my-2 font-mono">
                   <p>
@@ -254,6 +321,43 @@ const Page = () => {
                   </Link>
                 </div>
               )}
+
+              {
+                filteredItems.length !== 0 && (
+                  <ul className="border border-gray-700 p-2 rounded">
+                    <p className="font-sans mb-2">Отфильтрованные результаты:</p>
+                {filteredItems.length > 0 ? (
+                  filteredItems.map((item) => (
+                    <li
+                      key={item.id}
+                      className="py-1 px-2 bg-gray-800 rounded mb-1"
+                    >
+                      {item.title}
+                      <span className="flex gap-2">
+                      <TrashIcon
+                        onClick={() =>
+                          handleDelete(
+                            item.id,
+                            activeTable === "Каталог"
+                              ? "katalog"
+                              : activeTable === "Продукты"
+                              ? "product"
+                              : "material",
+                            activeTable
+                          )
+                        }
+                        className="mt-1 w-4 h-4 cursor-pointer"
+                      />
+                    </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500">Нет данных</li>
+                )}
+              </ul>
+                )
+              }
+
               <ul className="mt-4 space-y-2">
                 {items[activeTable]?.map((item, index) => (
                   <li
@@ -364,22 +468,24 @@ const Page = () => {
                     </option>
                   ))}
                 </select>
-                {items["Продукты"].some((pim) => pim.katolog_id == selectedCatalogM) && (
-  <select
-    className="w-full p-2 border border-gray-700 rounded mb-4 bg-gray-800 text-white"
-    value={selectedPrdM}
-    onChange={(e) => setSelectedPrdM(e.target.value)}
-  >
-    <option value="">Выберите продукт</option>
-    {items["Продукты"]
-      .filter((pim) => pim.katolog_id !== selectedCatalogM) // ✅ Corrected condition
-      .map((cat) => (
-        <option key={cat.id} value={cat.id}>
-          {cat.title}
-        </option>
-      ))}
-  </select>
-)}
+                {items["Продукты"].some(
+                  (pim) => pim.katolog_id == selectedCatalogM
+                ) && (
+                  <select
+                    className="w-full p-2 border border-gray-700 rounded mb-4 bg-gray-800 text-white"
+                    value={selectedPrdM}
+                    onChange={(e) => setSelectedPrdM(e.target.value)}
+                  >
+                    <option value="">Выберите продукт</option>
+                    {items["Продукты"]
+                      .filter((pim) => pim.katolog_id !== selectedCatalogM) // ✅ Corrected condition
+                      .map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.title}
+                        </option>
+                      ))}
+                  </select>
+                )}
               </>
             )}
             <button
@@ -391,7 +497,11 @@ const Page = () => {
                   ? addProduct
                   : addMaterial
               }
-              disabled={!(items["Продукты"].some((pim) => pim.katolog_id == selectedCatalogM))}
+              disabled={
+                !items["Продукты"].some(
+                  (pim) => pim.katolog_id == selectedCatalogM
+                )
+              }
             >
               Сохранить
             </button>
