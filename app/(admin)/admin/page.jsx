@@ -2,6 +2,7 @@
 import { supabase } from "@/app/supabase/store";
 import { EditIcon, TrashIcon, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState, useEffect, useRef } from "react";
 
 const Page = () => {
@@ -24,6 +25,8 @@ const Page = () => {
     Материалы: [],
   });
   const refInput = useRef(null);
+  const router = useRouter();
+
 
   const loggedIn = userPassword === "admin123";
 
@@ -61,7 +64,6 @@ const Page = () => {
       fetchMaterial();
     }
   }, [loggedIn]);
-  
 
   const addCatalog = async () => {
     if (!newItem.trim()) return;
@@ -77,13 +79,12 @@ const Page = () => {
 
     setItems((prev) => ({
       ...prev,
-      Каталог: [
-        ...prev.Каталог,
-        { title: newItem, description: "" },
-      ],
+      Каталог: [...prev.Каталог, { title: newItem, description: "" }],
     }));
     setNewItem("");
     setModalOpen(false);
+    router.refresh(); 
+
   };
 
   const addProduct = async () => {
@@ -91,7 +92,13 @@ const Page = () => {
 
     const { data, error } = await supabase
       .from("product")
-      .insert([{ title: newItem, katolog_id: selectedCatalog, description: newDescription }]);
+      .insert([
+        {
+          title: newItem,
+          katolog_id: selectedCatalog,
+          description: newDescription,
+        },
+      ]);
 
     if (error) {
       console.error("Ошибка при добавлении продукта:", error.message);
@@ -102,13 +109,19 @@ const Page = () => {
       ...prev,
       Продукты: [
         ...prev.Продукты,
-        { title: newItem, katolog_id: selectedCatalog, description: newDescription },
+        {
+          title: newItem,
+          katolog_id: selectedCatalog,
+          description: newDescription,
+        },
       ],
     }));
     setNewItem("");
     setSelectedCatalog("");
     setNewDescription("");
     setModalOpen(false);
+    router.refresh(); 
+
   };
 
   const addMaterial = async () => {
@@ -145,6 +158,7 @@ const Page = () => {
     setSelectedCatalogM("");
     setSelectedPrdM("");
     setModalOpen(false);
+    router.refresh(); 
   };
 
   const handleDelete = async (id, table, tbl) => {
@@ -167,13 +181,9 @@ const Page = () => {
           item.id === id ? { ...item, ...updatedData } : item
         ),
       }));
-      setModalOpenEdit(false)
+      setModalOpenEdit(false);
     }
   };
-
-
-
-
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -200,14 +210,15 @@ const Page = () => {
 
             <div className="flex-1 mt-10 md:ml-6 p-4">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-start md:justify-between">
-               {
-                  activeTable && (
-                    <h2 className="text-lg font-bold flex gap-2 md:gap-1 flex-row md:flex-col">{activeTable} <EditIcon onClick={(
-
-                    )=> setModalOpenEdit(true)} className="mt-1 w-5 h-5 cursor-pointer" />
-                    </h2>
-                  )
-               }
+                {activeTable && (
+                  <h2 className="text-lg font-bold flex gap-2 md:gap-1 flex-row md:flex-col">
+                    {activeTable}{" "}
+                    <EditIcon
+                      onClick={() => setModalOpenEdit(true)}
+                      className="mt-1 w-5 h-5 cursor-pointer"
+                    />
+                  </h2>
+                )}
                 <button
                   className="px-4 py-2 cursor-pointer disabled:bg-gray-500 disabled:cursor-not-allowed bg-blue-500 text-white rounded-lg w-full md:w-auto"
                   onClick={() => {
@@ -254,7 +265,6 @@ const Page = () => {
                     {item.product_id && `<|> (Ид продукта: ${item.product_id})`}{" "}
                     {item.katolog_id && `<|> (Ид каталога: ${item.katolog_id})`}
                     <span className="flex gap-2">
-                      
                       <TrashIcon
                         onClick={() =>
                           handleDelete(
@@ -354,23 +364,26 @@ const Page = () => {
                     </option>
                   ))}
                 </select>
-
-                <select
-                  className="w-full p-2 border border-gray-700 rounded mb-4 bg-gray-800 text-white"
-                  value={selectedPrdM}
-                  onChange={(e) => setSelectedPrdM(e.target.value)}
-                >
-                  <option value="">Выберите продукт</option>
-                  {items["Продукты"].map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.title}
-                    </option>
-                  ))}
-                </select>
+                {items["Продукты"].some((pim) => pim.katolog_id == selectedCatalogM) && (
+  <select
+    className="w-full p-2 border border-gray-700 rounded mb-4 bg-gray-800 text-white"
+    value={selectedPrdM}
+    onChange={(e) => setSelectedPrdM(e.target.value)}
+  >
+    <option value="">Выберите продукт</option>
+    {items["Продукты"]
+      .filter((pim) => pim.katolog_id !== selectedCatalogM) // ✅ Corrected condition
+      .map((cat) => (
+        <option key={cat.id} value={cat.id}>
+          {cat.title}
+        </option>
+      ))}
+  </select>
+)}
               </>
             )}
             <button
-              className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
+              className="px-4 py-2 cursor-pointer  disabled:cursor-not-allowed bg-blue-500 text-white rounded-lg"
               onClick={
                 modalType === "Каталог"
                   ? addCatalog
@@ -378,6 +391,7 @@ const Page = () => {
                   ? addProduct
                   : addMaterial
               }
+              disabled={!(items["Продукты"].some((pim) => pim.katolog_id == selectedCatalogM))}
             >
               Сохранить
             </button>
@@ -391,170 +405,196 @@ const Page = () => {
         </div>
       )}
 
-{modalOpenEdit && (
-  <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-    <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md text-white">
-        <div className="flex flex-row justify-between">
-      <h2 className="text-lg font-bold mb-4">Редактировать {activeTable}</h2>
-<X onClick={() => setModalOpenEdit(false)} className="mt-1 w-5 h-5 cursor-pointer" />
-        </div>
-      {items[activeTable]?.length > 0 && (
-        <>
-          {/* Select which item to edit */}
-          <select
-            className="w-full p-2 border rounded bg-gray-800 text-white"
-            value={activeItemId}
-            onChange={(e) => setActiveItemId(e.target.value)}
-          >
-            <option value="">Выберите элемент</option>
-            {items[activeTable].map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.title}
-              </option>
-            ))}
-          </select>
-
-          <hr className="my-3" />
-        </>
-      )}
-
-      
-
-      {activeItemId && (
-        <>
-          {(() => {
-            const activeItem = items[activeTable]?.find((item) => item.id == activeItemId);
-            
-            
-            if (!activeItem) return null;
-
-            return (
+      {modalOpenEdit && (
+        <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md text-white">
+            <div className="flex flex-row justify-between">
+              <h2 className="text-lg font-bold mb-4">
+                Редактировать {activeTable}
+              </h2>
+              <X
+                onClick={() => setModalOpenEdit(false)}
+                className="mt-1 w-5 h-5 cursor-pointer"
+              />
+            </div>
+            {items[activeTable]?.length > 0 && (
               <>
-              <p>Заголовок</p>
-                <input
-                  type="text"
-                  placeholder="..."
-                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                  value={activeItem.title || ""}
-                  onChange={(e) =>
-                    setItems((prevItems) => ({
-                      ...prevItems,
-                      [activeTable]: prevItems[activeTable].map((item) =>
-                        item.id == activeItemId ? { ...item, title: e.target.value } : item
-                      ),
-                    }))
-                  }
-                />
-
-                {activeTable === "Продукты" && (
-                 <>
-                  <p>Описание</p>
-                  <input
-                    type="text"
-                    placeholder="Описание"
-                    className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                    value={activeItem.description || ""}
-                    onChange={(e) =>
-                      setItems((prevItems) => ({
-                        ...prevItems,
-                        [activeTable]: prevItems[activeTable].map((item) =>
-                          item.id == activeItemId ? { ...item, description: e.target.value } : item
-                        ),
-                      }))
-                    }
-                  />
-                 </>
-                )}
-
-                {activeTable === "Материалы" && (
-                 <>
-                 <p>Содержимое</p>
-                  <textarea
-                    type="text"
-                    placeholder="Содержимое"
-                    className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={activeItem.content || ""}
-                    onChange={(e) =>
-                      setItems((prevItems) => ({
-                        ...prevItems,
-                        [activeTable]: prevItems[activeTable].map((item) =>
-                          item.id == activeItemId ? { ...item, content: e.target.value } : item
-                        ),
-                      }))
-                    }
-                  /></>
-                )}
-
-                {activeTable !== "Каталог" && (
-                  <>
-                  <p>Каталог</p>
-                    <select
-                      className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                      value={activeItem.katolog_id || ""}
-                      onChange={(e) =>
-                        setItems((prevItems) => ({
-                          ...prevItems,
-                          [activeTable]: prevItems[activeTable].map((item) =>
-                            item.id == activeItemId ? { ...item, katolog_id: e.target.value } : item
-                          ),
-                        }))
-                      }
-                    >
-                      <option value="">Выберите каталог</option>
-                      {items["Каталог"].map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.title}
-                        </option>
-                      ))}
-                    </select>
-
-<p>Продукт</p>
-                    <select
-                      className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                      value={activeItem.product_id || ""}
-                      onChange={(e) =>
-                        setItems((prevItems) => ({
-                          ...prevItems,
-                          [activeTable]: prevItems[activeTable].map((item) =>
-                            item.id == activeItemId ? { ...item, product_id: e.target.value } : item
-                          ),
-                        }))
-                      }
-                    >
-                      <option value="">Выберите продукт</option>
-                      {items["Продукты"].map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.title}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                )}
-
-                <button
-                  className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
-                  onClick={() => handleEdit(activeItemId, activeTable, activeItem, activeTable === "Каталог"
-                    ? "katalog"
-                    : activeTable === "Продукты"
-                    ? "product"
-                    : "material")}
+                {/* Select which item to edit */}
+                <select
+                  className="w-full p-2 border rounded bg-gray-800 text-white"
+                  value={activeItemId}
+                  onChange={(e) => setActiveItemId(e.target.value)}
                 >
-                  Сохранить
-                </button>
-                <button
-                  className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
-                  onClick={() => setModalOpenEdit(false)}
-                >
-                  Отмена
-                </button>
+                  <option value="">Выберите элемент</option>
+                  {items[activeTable].map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+                </select>
+
+                <hr className="my-3" />
               </>
-            );
-          })()}
-        </>
+            )}
+
+            {activeItemId && (
+              <>
+                {(() => {
+                  const activeItem = items[activeTable]?.find(
+                    (item) => item.id == activeItemId
+                  );
+
+                  if (!activeItem) return null;
+
+                  return (
+                    <>
+                      <p>Заголовок</p>
+                      <input
+                        type="text"
+                        placeholder="..."
+                        className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                        value={activeItem.title || ""}
+                        onChange={(e) =>
+                          setItems((prevItems) => ({
+                            ...prevItems,
+                            [activeTable]: prevItems[activeTable].map((item) =>
+                              item.id == activeItemId
+                                ? { ...item, title: e.target.value }
+                                : item
+                            ),
+                          }))
+                        }
+                      />
+
+                      {activeTable === "Продукты" && (
+                        <>
+                          <p>Описание</p>
+                          <input
+                            type="text"
+                            placeholder="Описание"
+                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                            value={activeItem.description || ""}
+                            onChange={(e) =>
+                              setItems((prevItems) => ({
+                                ...prevItems,
+                                [activeTable]: prevItems[activeTable].map(
+                                  (item) =>
+                                    item.id == activeItemId
+                                      ? { ...item, description: e.target.value }
+                                      : item
+                                ),
+                              }))
+                            }
+                          />
+                        </>
+                      )}
+
+                      {activeTable === "Материалы" && (
+                        <>
+                          <p>Содержимое</p>
+                          <textarea
+                            type="text"
+                            placeholder="Содержимое"
+                            className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={activeItem.content || ""}
+                            onChange={(e) =>
+                              setItems((prevItems) => ({
+                                ...prevItems,
+                                [activeTable]: prevItems[activeTable].map(
+                                  (item) =>
+                                    item.id == activeItemId
+                                      ? { ...item, content: e.target.value }
+                                      : item
+                                ),
+                              }))
+                            }
+                          />
+                        </>
+                      )}
+
+                      {activeTable !== "Каталог" && (
+                        <>
+                          <p>Каталог</p>
+                          <select
+                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                            value={activeItem.katolog_id || ""}
+                            onChange={(e) =>
+                              setItems((prevItems) => ({
+                                ...prevItems,
+                                [activeTable]: prevItems[activeTable].map(
+                                  (item) =>
+                                    item.id == activeItemId
+                                      ? { ...item, katolog_id: e.target.value }
+                                      : item
+                                ),
+                              }))
+                            }
+                          >
+                            <option value="">Выберите каталог</option>
+                            {items["Каталог"].map((cat) => (
+                              <option key={cat.id} value={cat.id}>
+                                {cat.title}
+                              </option>
+                            ))}
+                          </select>
+
+                          <p>Продукт</p>
+                          <select
+                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                            value={activeItem.product_id || ""}
+                            onChange={(e) =>
+                              setItems((prevItems) => ({
+                                ...prevItems,
+                                [activeTable]: prevItems[activeTable].map(
+                                  (item) =>
+                                    item.id == activeItemId
+                                      ? { ...item, product_id: e.target.value }
+                                      : item
+                                ),
+                              }))
+                            }
+                          >
+                            <option value="">Выберите продукт</option>
+                            {items["Продукты"].map((product) => (
+                              <option key={product.id} value={product.id}>
+                                {product.title}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+
+                      <button
+                        className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
+                        onClick={() =>
+                          handleEdit(
+                            activeItemId,
+                            activeTable,
+                            activeItem,
+                            activeTable === "Каталог"
+                              ? "katalog"
+                              : activeTable === "Продукты"
+                              ? "product"
+                              : "material"
+                          )
+                        }
+                      >
+                        Сохранить
+                      </button>
+                      <button
+                        className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
+                        onClick={() => setModalOpenEdit(false)}
+                      >
+                        Отмена
+                      </button>
+                    </>
+                  );
+                })()}
+              </>
+            )}
+          </div>
+        </div>
       )}
-    </div>
-  </div>
-)}
     </div>
   );
 };

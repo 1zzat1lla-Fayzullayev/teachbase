@@ -127,7 +127,11 @@ function Navbar() {
                 <li key={item.id}>
                   <button
                     onClick={() => {
-                      router.push(`/${item.id}`, { shallow: true });
+                      (products.find((cn)=> cn.katolog_id == item.id)) &&
+                      router.push(`/${item.id}/${products.find((cn)=> cn.katolog_id == item.id)?.id}/${materials.find(
+                        (mid) =>
+                          mid.katolog_id == item.id && mid.product_id == products.find((cn) => cn.katolog_id === item.id)?.id
+                      )?.id}`, { shallow: true });
                     }}
                     className={`${
                       item.id == category

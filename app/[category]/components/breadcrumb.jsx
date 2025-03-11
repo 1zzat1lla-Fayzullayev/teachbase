@@ -14,15 +14,16 @@ const Breadcrumb = () => {
       const [{ data: catalogs }, { data: products }, { data: materials }] =
         await Promise.all([
           supabase.from("katalog").select("id, title"),
-          supabase.from("product").select("id, title"),
-          supabase.from("material").select("id, title"),
+          supabase.from("product").select("id, title, katolog_id"),
+          supabase.from("material").select("id, title, product_id"),
         ]);
 
       const titleMap = {};
 
-      catalogs?.forEach((item) => (titleMap[item.id] = item.title));
-      products?.forEach((item) => (titleMap[item.id] = item.title));
-      materials?.forEach((item) => (titleMap[item.id] = item.title));
+      catalogs?.forEach((item) => (titleMap[`catalog_${item.id}`] = item.title));
+      products?.forEach((item) => (titleMap[`product_${item.id}`] = item.title));
+      materials?.forEach((item) => (titleMap[`material_${item.id}`] = item.title));
+
 
       setTitles(titleMap);
     }
@@ -55,8 +56,13 @@ const Breadcrumb = () => {
         </svg> */}
         {pathSegments.map((segment, index) => {
           const path = "/" + pathSegments.slice(0, index + 1).join("/");
+          let title = segment; // Default to ID if no match
+
           const isLast = index === pathSegments.length - 1;
-          const title = titles[segment] || segment; 
+          if (index === 0) title = titles[`catalog_${segment}`] || segment;
+          else if (index === 1) title = titles[`product_${segment}`] || segment;
+          else if (index === 2) title = titles[`material_${segment}`] || segment;
+
 
           return (
             <Fragment key={index}>
