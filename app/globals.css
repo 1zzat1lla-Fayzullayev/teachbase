@@ -59,3 +59,8 @@ body::-webkit-scrollbar-corner {
 .burger.open div:nth-child(3) {
   transform: rotate(-45deg) translateY(-10px);
 }
+
+
+ol li{
+  list-style: auto;
+}

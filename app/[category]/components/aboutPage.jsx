@@ -20,7 +20,6 @@ function AboutPage() {
         console.error("Ошибка при получении продуктов:", error.message);
       } else {
         setContent(data[0]?.content);
-        console.log("dasda", data[0]?.content);
       }
     };
     fetchMaterial();

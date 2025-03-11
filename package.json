@@ -19,6 +19,7 @@
     "react-markdown": "^10.1.0",
     "rehype-starry-night": "^2.2.0",
     "remark-gfm": "^4.0.1",
+    "swr": "^2.3.3",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {

@@ -14,9 +14,7 @@ function Navbar() {
   const [openFat, setOpenFat] = useState([]);
   const [logo, setLogo] = useState("/logo.svg");
 
-  useEffect(() => {
-    setLogo(theme === "dark" ? "/logo.svg" : "/lightLogo.svg");
-  }, []);
+
 
   const data = [
     {
@@ -92,7 +90,7 @@ function Navbar() {
         <Wrapper>
           <div className="px-6 fixed w-full left-0 top-0 py-[15px] border-b border-b-[#9ca3af33] flex justify-between items-center z-[999] backdrop-blur-[40px]">
             <Link href="/">
-              <img src={logo} className="cursor-pointer" alt="Logo" />
+              <img src={theme == "light" ? "/lightLogo.svg" : "/logo.svg"} className="cursor-pointer" alt="Logo" />
             </Link>
             <ul className="items-center gap-5 hidden md:flex">
               {["Категория 1", "Категория 2", "Категория 3", "Категория 4"].map(

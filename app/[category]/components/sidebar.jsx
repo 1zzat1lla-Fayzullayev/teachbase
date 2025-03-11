@@ -1,28 +1,69 @@
 "use client";
 import { supabase } from "@/app/supabase/store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import useSWR from "swr";
+
+
+const fetchDataP = async () => {
+  const { data, error } = await supabase.from("product").select("*");
+
+    
+    console.log(data)
+    return data;
+  
+};
+
+const fetchDataM = async () => {
+ 
+
+  const { data, error } = await supabase.from("material").select("*");
+
+  
+    console.log(data);
+  return data;
+  
+};
+
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const [catalogs, setCatalogs] = useState([]);
-  const [openIndices, setOpenIndices] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase.from("katalog").select("*");
-      if (!error) setCatalogs(data);
-    };
-    fetchData();
-  }, []);
+
+  const { data: materials, errorM } = useSWR("material", fetchDataM, { revalidateOnFocus: false });
+  const { data: products, errorP } = useSWR("product", fetchDataP, { revalidateOnFocus: false });
+
+
+  
+  const [openIndices, setOpenIndices] = useState();
+  const [openFat, setOpenFat] = useState([]);
+  const router = useRouter();
+
+  if (errorM) return <p>Error loading materials</p>;
+  if (!materials) return <p>Loading...</p>;
+  if (errorP) return <p>Error loading products</p>;
+  if (!products) return <p>Loading...</p>;
+
+  // const [products, setProducts] = useState([]);
+  // const [materials, setMaterials] = useState([]);
+
+  // useEffect(() => {
+    
+  //   fetchData();
+  // }, []);
+
+  // 
+  // 
+  // 
 
   const toggleAccordion = (index) => {
-    if (openIndices.includes(index)) {
-      setOpenIndices(openIndices.filter((i) => i !== index));
-    } else {
-      setOpenIndices([...openIndices, index]);
-    }
+    setOpenIndices(index)
   };
 
-  const [openFat, setOpenFat] = useState([]);
+  // 
+  // 
+  // 
+
 
   const toogleOpenFather = (index) => {
     if (openFat.includes(index)) {
@@ -46,13 +87,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 isOpen ? "flex" : "hidden"
               }`}
             >
-              {catalogs.map((item, index) => (
-                <li key={item.id || index}>
+              {products.map((product, index) => (
+                <li key={index}>
                   <button
-                    onClick={() => toogleOpenFather(index)}
+                    onClick={() => (toogleOpenFather(index))}
                     className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50"
                   >
-                    {item.title}
+                    {product.title}
                     <svg
                       fill="none"
                       viewBox="0 0 24 24"
@@ -71,29 +112,28 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     </svg>
                   </button>
 
-                  {item.description && Array.isArray(item.description) && (
+                  {openFat  && (
                     <div
                       className={`cild ${
                         openFat.includes(index) ? "" : "h-[0px]"
                       } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
                     >
                       <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
-                        {item.description.map((subItem, subIndex) => (
+                        {materials.filter((itm)=> itm.product_id == product.id)?.map((subItem, subIndex) => (
                           <li
                             key={subItem.id || subIndex}
                             className="flex flex-col gap-1"
                           >
-                            <a
+                            <div
                               className={`${
-                                openIndices.includes(subIndex)
+                                openIndices == subItem.id
                                   ? "!bg-[#172229] !text-[#0282d9] font-semibold"
                                   : ""
                               } flex rounded px-2 py-1.5 text-sm transition-colors cursor-pointer`}
-                              onClick={() => toggleAccordion(subIndex)}
-                              href="#"
+                              onClick={() => {toggleAccordion(subItem.id), router.push(`/${product.katolog_id}/${product.id}/${subItem.id}`, { shallow: true })}}
                             >
                               {subItem.title}
-                            </a>
+                            </div>
                           </li>
                         ))}
                       </ul>

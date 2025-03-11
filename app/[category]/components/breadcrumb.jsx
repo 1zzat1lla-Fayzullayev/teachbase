@@ -35,7 +35,7 @@ const Breadcrumb = () => {
 
           return (
             <Fragment key={index}>
-              <li className="whitespace-nowrap transition-colors min-w-[24px] overflow-hidden text-ellipsis">
+              <li className="whitespace-nowrap text-center transition-colors min-w-[24px] overflow-hidden text-ellipsis">
                 {isLast ? (
                   <span className="text-white font-semibold">
                     {decodeURIComponent(segment)}
