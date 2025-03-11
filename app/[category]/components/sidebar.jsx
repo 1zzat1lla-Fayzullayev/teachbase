@@ -1,7 +1,7 @@
 "use client";
 import { supabase } from "@/app/supabase/store";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 
@@ -29,6 +29,8 @@ const fetchDataM = async () => {
 
 export default function Sidebar({ isOpen, setIsOpen }) {
 
+  
+  const { category, product, material } = useParams(); 
 
   const { data: materials, errorM } = useSWR("material", fetchDataM, { revalidateOnFocus: false });
   const { data: products, errorP } = useSWR("product", fetchDataP, { revalidateOnFocus: false });
@@ -39,10 +41,24 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const [openFat, setOpenFat] = useState([]);
   const router = useRouter();
 
+  useEffect(() => {
+    if (materials) {
+      const currentMaterial = materials.find((m) => m.id.toString() === material);
+      if (currentMaterial) {
+        setOpenIndices(currentMaterial.id);
+        setOpenFat([...openFat, currentMaterial.product_id]);
+       // setOpenDropdown(currentMaterial.product); // Open the dropdown of the active material
+      }
+    }
+  }, [material, materials]);
+
   if (errorM) return <p>Error loading materials</p>;
-  if (!materials) return <p>Loading...</p>;
+  if (!materials) return <p className="w-[320px]">Loading...</p>;
   if (errorP) return <p>Error loading products</p>;
-  if (!products) return <p>Loading...</p>;
+  if (!products) return <p className="w-[320px]">Loading...</p>;
+
+
+
 
   // const [products, setProducts] = useState([]);
   // const [materials, setMaterials] = useState([]);
@@ -90,7 +106,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               {products.map((product, index) => (
                 <li key={index}>
                   <button
-                    onClick={() => (toogleOpenFather(index))}
+                    onClick={() => (toogleOpenFather(product.id))}
                     className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50"
                   >
                     {product.title}
@@ -99,7 +115,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       className={` ${
-                        openFat.includes(index) ? "rotate-90" : ""
+                        openFat.includes(product.id) ? "rotate-90" : ""
                       } transition-transform h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5`}
                     >
                       <path
@@ -115,7 +131,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   {openFat  && (
                     <div
                       className={`cild ${
-                        openFat.includes(index) ? "" : "h-[0px]"
+                        openFat.includes(product.id) ? "" : "h-[0px]"
                       } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
                     >
                       <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>

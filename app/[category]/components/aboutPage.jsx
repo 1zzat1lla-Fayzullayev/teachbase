@@ -1,10 +1,13 @@
 "use client";
 import { supabase } from "@/app/supabase/store";
 import { slugify } from "@/app/utils/util";
+import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 function AboutPage() {
   const [content, setContent] = useState("");
+  const { category, product, material } = useParams();
+
 
   const [headings, setHeadings] = useState([]);
 
@@ -15,11 +18,11 @@ function AboutPage() {
 
   useEffect(() => {
     const fetchMaterial = async () => {
-      const { data, error } = await supabase.from("material").select("*");
+      const { data, error } = await supabase.from("material").select("*").eq("id", material).single();
       if (error) {
         console.error("Ошибка при получении продуктов:", error.message);
       } else {
-        setContent(data[0]?.content);
+        setContent(data.content);
       }
     };
     fetchMaterial();
@@ -111,13 +114,7 @@ function AboutPage() {
             >
               {link}
             </a>
-            {/* <a
-              className={`block text-[15px] ${
-                activeHeading == slugify(link) ? "!text-[#008ae6]" : ""
-              } font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300`}
-            >
-              
-            </a> */}
+            
           </li>
         ))}
       </ul>
