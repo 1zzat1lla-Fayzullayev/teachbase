@@ -28,6 +28,12 @@ const Page = () => {
   const refInput = useRef(null);
   const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  
+  const [activeItemId2, setActiveItemId2] = useState("");
+  const [filteredItems2, setFilteredItems] = useState([]);
+
 
   const loggedIn = userPassword === "admin123";
 
@@ -65,6 +71,16 @@ const Page = () => {
       fetchMaterial();
     }
   }, [loggedIn]);
+
+  useEffect(() => {
+    if (!items[activeTable]) return;
+    setFilteredItems(
+      items[activeTable].filter((item) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [searchQuery, items, activeTable]);
+
 
   const addCatalog = async () => {
     if (!newItem.trim()) return;
@@ -164,6 +180,7 @@ const Page = () => {
       ...prev,
       [tbl]: prev[tbl].filter((item) => item.id !== id),
     }));
+    router.refresh()
   };
 
   const handleEdit = async (id, table, updatedData, tbl) => {
@@ -175,10 +192,11 @@ const Page = () => {
       setItems((prev) => ({
         ...prev,
         [table]: prev[table].map((item) =>
-          item.id === id ? { ...item, ...updatedData } : item
+          item.id == id ? { ...item, ...updatedData } : item
         ),
       }));
       setModalOpenEdit(false);
+      router.refresh()
     }
   };
 
@@ -218,6 +236,9 @@ const Page = () => {
   };
 
   const filteredItems = filterData();
+
+  const activeItem = items[activeTable]?.find((item) => item.id == activeItemId2);
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -515,7 +536,7 @@ const Page = () => {
         </div>
       )}
 
-      {modalOpenEdit && (
+      {/* {modalOpenEdit && (
         <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
           <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md text-white">
             <div className="flex flex-row justify-between">
@@ -529,7 +550,7 @@ const Page = () => {
             </div>
             {items[activeTable]?.length > 0 && (
               <>
-                {/* Select which item to edit */}
+                
                 <select
                   className="w-full p-2 border rounded bg-gray-800 text-white"
                   value={activeItemId}
@@ -704,7 +725,181 @@ const Page = () => {
             )}
           </div>
         </div>
-      )}
+      )} */}
+
+
+{
+  modalOpenEdit && (
+    <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
+      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md text-white">
+        <div className="flex flex-row justify-between">
+          <h2 className="text-lg font-bold mb-4">Редактировать {activeTable}</h2>
+          <X onClick={() => setModalOpenEdit(false)} className="mt-1 w-5 h-5 cursor-pointer" />
+        </div>
+
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Поиск..."
+          className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white mb-3"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        {/* Select an Item to Edit */}
+        {filteredItems2.length > 0 && (
+          <select
+            className="w-full p-2 border rounded bg-gray-800 text-white"
+            value={activeItemId2}
+            onChange={(e) => setActiveItemId2(e.target.value)}
+          >
+            <option value="">Выберите элемент</option>
+            {filteredItems2.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <hr className="my-3" />
+
+        {/* Edit Form */}
+        {activeItem && (
+          <>
+            <p>Заголовок</p>
+            <input
+              type="text"
+              placeholder="..."
+              className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+              value={activeItem.title || ""}
+              onChange={(e) =>
+                setItems((prev) => ({
+                  ...prev,
+                  [activeTable]: prev[activeTable].map((item) =>
+                    item.id == activeItemId2 ? { ...item, title: e.target.value } : item
+                  ),
+                }))
+              }
+            />
+
+            {/* Product Description */}
+            {activeTable === "Продукты" && (
+              <>
+                <p>Описание</p>
+                <input
+                  type="text"
+                  placeholder="Описание"
+                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                  value={activeItem.description || ""}
+                  onChange={(e) =>
+                    setItems((prev) => ({
+                      ...prev,
+                      [activeTable]: prev[activeTable].map((item) =>
+                        item.id == activeItemId2 ? { ...item, description: e.target.value } : item
+                      ),
+                    }))
+                  }
+                />
+              </>
+            )}
+
+            {/* Material Content */}
+            {activeTable === "Материалы" && (
+              <>
+                <p>Содержимое</p>
+                <textarea
+                  className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none"
+                  value={activeItem.content || ""}
+                  onChange={(e) =>
+                    setItems((prev) => ({
+                      ...prev,
+                      [activeTable]: prev[activeTable].map((item) =>
+                        item.id == activeItemId2 ? { ...item, content: e.target.value } : item
+                      ),
+                    }))
+                  }
+                />
+              </>
+            )}
+
+            {/* Select Catalog */}
+            {activeTable === "Продукты" && (
+              <>
+                <p>Каталог</p>
+                <select
+                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                  value={activeItem.katolog_id || ""}
+                  onChange={(e) =>
+                    setItems((prev) => ({
+                      ...prev,
+                      [activeTable]: prev[activeTable].map((item) =>
+                        item.id == activeItemId2 ? { ...item, katolog_id: e.target.value } : item
+                      ),
+                    }))
+                  }
+                >
+                  <option value="">Выберите каталог</option>
+                  {items["Каталог"].map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.title}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Select Product */}
+                {/* <p>Продукт</p>
+                <select
+                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                  value={activeItem.product_id || ""}
+                  onChange={(e) =>
+                    setItems((prev) => ({
+                      ...prev,
+                      [activeTable]: prev[activeTable].map((item) =>
+                        item.id == activeItemId2 ? { ...item, product_id: e.target.value } : item
+                      ),
+                    }))
+                  }
+                >
+                  <option value="">Выберите продукт</option>
+                  {items["Продукты"]
+                    .filter((prod) => prod.katolog_id == activeItem.katolog_id) // Filter by selected catalog
+                    .map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.title}
+                      </option>
+                    ))}
+                </select> */}
+              </>
+            )}
+
+            {/* Save / Cancel Buttons */}
+            <button
+              className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
+              onClick={() =>
+                handleEdit(
+                  activeItemId2,
+                  activeTable,
+                  activeItem,
+                  activeTable === "Каталог" ? "katalog" : activeTable === "Продукты" ? "product" : "material"
+                )
+              }
+            >
+              Сохранить
+            </button>
+            <button
+              className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
+              onClick={() => setModalOpenEdit(false)}
+            >
+              Отмена
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+
+}
     </div>
   );
 };
