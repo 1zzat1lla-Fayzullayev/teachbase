@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { searchMaterials } from "../lib/action";
 import { useRouter } from "next/navigation";
+import { supabase } from "../supabase/store";
 
 function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -17,6 +18,7 @@ function Navbar() {
   const [openFat, setOpenFat] = useState([]);
   const [results, setResults] = useState([]);
   const [isPending, startTransition] = useTransition();
+  const [products, setProducts] = useState([]);
 
   const handleSearch = async (e) => {
     // e.preventDefault();
@@ -29,35 +31,19 @@ function Navbar() {
     });
   };
 
-  const data = [
-    {
-      title: "Курсы",
-      items: [
-        {
-          title: "Katalog1",
-          items: [
-            {
-              title: "Katalog1 title",
-            },
-            {
-              title: "Katalog2 title",
-            },
-          ],
-        },
-        {
-          title: "Katalog2",
-          items: [
-            {
-              title: "Katalog3 title",
-            },
-            {
-              title: "Katalog4 title",
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  const fetchProducts = async () => {
+    const { data, error } = await supabase.from("product").select("*");
+    if (error) {
+      console.error("Ошибка при получении продуктов:", error.message);
+    } else {
+      setProducts(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
 
   const focusSearchInput = () => searchInputRef.current?.focus();
   const clearSearch = () => {
@@ -138,7 +124,7 @@ function Navbar() {
                   {searchValue ? "ESC" : "CTRL K"}
                 </kbd>
 
-                {(results.length == 0 && searchValue !== "") && (
+                {results.length == 0 && searchValue !== "" && (
                   <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-full z-20 mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
                     <span className="block select-none p-8 text-center text-sm text-gray-400">
                       Ничего не найдено.
@@ -146,16 +132,24 @@ function Navbar() {
                   </ul>
                 )}
 
-                {(results.length > 0 && searchValue !== "") && (
+                {results.length > 0 && searchValue !== "" && (
                   <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-full z-20 mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
                     {results.map((item, index) => (
                       <li
                         key={index}
                         className="mx-2.5 break-words rounded-md contrast-more:border hover:bg-[#3B82F6]/10 cursor-pointer hover:text-[#2563EB] contrast-more:border-[#3B82F6]"
                       >
-                        <a 
-                          onClick={() => {(item.type === "material") && router.push(`/${item.katalog_id}/${item.product_id}/${item.id}`,  { shallow: true }), clearSearch()}}
-                        className="block scroll-m-12 px-2.5 py-2">
+                        <a
+                          onClick={() => {
+                            item.type === "material" &&
+                              router.push(
+                                `/${item.katalog_id}/${item.product_id}/${item.id}`,
+                                { shallow: true }
+                              ),
+                              clearSearch();
+                          }}
+                          className="block scroll-m-12 px-2.5 py-2"
+                        >
                           <div
                             className="text-base font-semibold leading-5"
                             dangerouslySetInnerHTML={{ __html: item.title }}
@@ -200,86 +194,112 @@ function Navbar() {
             ref={searchInputRef}
             type="text"
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={(e) => {
+              setSearchValue(e.target.value), handleSearch(e.target.value);
+            }}
             placeholder="Найти..."
             className="bg-[#0000000d] dark:bg-[#f9fafb1a] px-3 py-[7px] transition-all text-sm border-none w-full rounded-lg focus:bg-[#0000000d] dark:focus:bg-[#111111] text-gray-500 placeholder:text-gray-400 dark:text-gray-300 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <ul className="flex flex-col gap-1 nextra-menu-mobile md:hidden mt-3">
-            {data.map((item, index) => (
-              <li
-                key={index}
-                className={openIndices.includes(index) ? "open" : ""}
-              >
-                <button
-                  className="items-center justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors cursor-pointer text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
-                  onClick={() => toggleAccordion(index)}
+          {results.length == 0 && searchValue !== "" && (
+            <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-[120px] left-0 right-0 mx-auto z-[999] mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
+              <span className="block select-none p-8 text-center text-sm text-gray-400">
+                Ничего не найдено.
+              </span>
+            </ul>
+          )}
+
+          {results.length > 0 && searchValue !== "" && (
+            <ul className="nextra-scrollbar border border-gray-200 bg-white text-gray-100 dark:border-neutral-800 dark:bg-neutral-900 absolute top-[120px] left-0 right-0 mx-auto z-[999] mt-2 overflow-auto overscroll-contain rounded-xl py-2.5 shadow-xl max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] inset-x-0 ltr:md:left-auto rtl:md:right-auto contrast-more:border contrast-more:border-gray-900 contrast-more:dark:border-gray-50 w-screen min-h-[100px] max-w-[min(calc(100vw-2rem),calc(100%+20rem))]">
+              {results.map((item, index) => (
+                <li
+                  key={index}
+                  className="mx-2.5 break-words rounded-md contrast-more:border hover:bg-[#3B82F6]/10 cursor-pointer hover:text-[#2563EB] contrast-more:border-[#3B82F6]"
                 >
-                  {item.title}
+                  <a
+                    onClick={() => {
+                      item.type === "material" &&
+                        router.push(
+                          `/${item.katalog_id}/${item.product_id}/${item.id}`,
+                          { shallow: true }
+                        ),
+                        clearSearch();
+                    }}
+                    className="block scroll-m-12 px-2.5 py-2"
+                  >
+                    <div
+                      className="text-base font-semibold leading-5"
+                      dangerouslySetInnerHTML={{ __html: item.title }}
+                    />
+                    {item.snippet && (
+                      <p
+                        className="mt-1 text-sm leading-[1.35rem] text-gray-600 dark:text-gray-400 contrast-more:dark:text-gray-50"
+                        dangerouslySetInnerHTML={{ __html: item.snippet }}
+                      />
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <ul className="flex flex-col gap-1 nextra-menu-mobile md:hidden mt-3">
+            {products.map((product, index) => (
+              <li key={index}>
+                <button
+                  onClick={() => toogleOpenFather(product.id)}
+                  className="items-center min-w-[224px] justify-between gap-2 text-left w-full flex rounded px-2 py-1.5 text-sm transition-colors  cursor-pointer contrast-more:border text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50"
+                >
+                  {product.title}
                   <svg
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    className="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"
+                    className={` ${
+                      openFat.includes(product.id) ? "rotate-90" : ""
+                    } transition-transform h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5`}
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
                       d="M9 5l7 7-7 7"
-                      className={`origin-center transition-transform ${
-                        openIndices.includes(index) ? "rotate-90" : ""
-                      }`}
-                    />
+                      className="origin-center transition-transform rtl:-rotate-180"
+                    ></path>
                   </svg>
                 </button>
-                {openIndices.includes(index) && item.items && (
-                  <div className="overflow-hidden transition-all ease-in-out duration-300">
-                    <ul className="flex flex-col gap-1 pl-4 border-l border-gray-200 dark:border-neutral-800">
-                      {item.items.map((subItem, subIndex) => (
-                        <li key={subIndex} className="relative">
-                          <button
-                            className="flex w-full justify-between items-center text-left rounded px-2 py-1.5 text-sm transition-colors cursor-pointer text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-neutral-400 dark:hover:bg-[#E0F2FE]/5 dark:hover:text-gray-50 contrast-more:text-gray-900 contrast-more:dark:text-gray-50 contrast-more:border-transparent contrast-more:hover:border-gray-900 contrast-more:dark:hover:border-gray-50"
-                            onClick={() =>
-                              toggleAccordion(`${index}-${subIndex}`)
-                            }
+
+                {openFat && (
+                  <div
+                    className={`cild ${
+                      openFat.includes(product.id) ? "" : "h-[0px]"
+                    } transform-gpu overflow-hidden transition-all ease-in-out motion-reduce:transition-none duration-300`}
+                  >
+                    <ul className='flex flex-col gap-1 relative before:absolute before:inset-y-1 before:w-px before:bg-gray-200 before:content-[""] dark:before:bg-neutral-800 ltr:pl-3 ltr:before:left-0 rtl:pr-3 rtl:before:right-0 ltr:ml-3 rtl:mr-3'>
+                      {products
+                        .filter((itm) => itm.product_id == product.id)
+                        ?.map((subItem, subIndex) => (
+                          <li
+                            key={subItem.id || subIndex}
+                            className="flex flex-col gap-1"
                           >
-                            {subItem.title}
-                            <svg
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              className="h-[18px] min-w-[18px] rounded-sm p-0.5 hover:bg-gray-800/5 dark:hover:bg-gray-100/5"
+                            <div
+                              className={`${
+                                openIndices == subItem.id
+                                  ? "!bg-[#e0efff] dark:!bg-[#172229] !text-[#004ca3] dark:!text-[#0282d9]  font-semibold"
+                                  : ""
+                              } text-[#6b7280] dark:text-white flex rounded px-2 py-1.5 text-sm transition-colors cursor-pointer`}
+                              onClick={() => {
+                                toggleAccordion(subItem.id),
+                                  router.push(
+                                    `/${product.katolog_id}/${product.id}/${subItem.id}`,
+                                    { shallow: true }
+                                  );
+                              }}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 5l7 7-7 7"
-                                className={`origin-center transition-transform ${
-                                  openIndices.includes(`${index}-${subIndex}`)
-                                    ? "rotate-90"
-                                    : ""
-                                }`}
-                              />
-                            </svg>
-                          </button>
-                          {openIndices.includes(`${index}-${subIndex}`) &&
-                            subItem.items && (
-                              <ul className="pl-4 border-l border-gray-300 dark:border-neutral-700">
-                                {subItem.items.map(
-                                  (nestedItem, nestedIndex) => (
-                                    <li
-                                      key={nestedIndex}
-                                      className="text-sm text-gray-500 dark:text-neutral-400 px-2 py-1"
-                                    >
-                                      {nestedItem.title}
-                                    </li>
-                                  )
-                                )}
-                              </ul>
-                            )}
-                        </li>
-                      ))}
+                              {subItem.title}
+                            </div>
+                          </li>
+                        ))}
                     </ul>
                   </div>
                 )}
