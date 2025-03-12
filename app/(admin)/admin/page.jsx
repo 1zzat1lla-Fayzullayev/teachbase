@@ -33,9 +33,49 @@ const Page = () => {
   
   const [activeItemId2, setActiveItemId2] = useState("");
   const [filteredItems2, setFilteredItems] = useState([]);
+  const [ loggedIn, setLoggedIn] = useState(false)
 
 
-  const loggedIn = userPassword === "admin123";
+  // const loggedIn = userPassword === "admin123";
+
+useEffect(()=>{
+  function login(userPassword) {
+    if (userPassword === "admin123") {
+        localStorage.setItem("loggedIn", "true");
+        return true;
+    }
+    return false;
+}
+
+function isLoggedIn() {
+    return localStorage.getItem("loggedIn") === "true";
+}
+
+
+function testLogin (){
+  if (isLoggedIn()) {
+    console.log("User is already logged in.");
+    setLoggedIn(true)
+} else {
+    if (login(userPassword)) {
+        console.log("Login successful!");
+    setLoggedIn(true)
+    } else {
+        console.log("Incorrect password.");
+    }
+}
+}
+
+testLogin()
+
+},[userPassword, setUserPassword])
+
+
+function refreshSite() {
+  window.location.reload();
+}
+
+
 
   useEffect(() => {
     const fetchCatalogs = async () => {
@@ -100,7 +140,7 @@ const Page = () => {
     }));
     setNewItem("");
     setModalOpen(false);
-    router.refresh();
+    refreshSite();
   };
 
   const addProduct = async () => {
@@ -134,7 +174,7 @@ const Page = () => {
     setSelectedCatalog("");
     setNewDescription("");
     setModalOpen(false);
-    router.refresh();
+    refreshSite();
   };
 
   const addMaterial = async () => {
@@ -171,7 +211,7 @@ const Page = () => {
     setSelectedCatalogM("");
     setSelectedPrdM("");
     setModalOpen(false);
-    router.refresh();
+    refreshSite();
   };
 
   const handleDelete = async (id, table, tbl) => {
@@ -180,7 +220,7 @@ const Page = () => {
       ...prev,
       [tbl]: prev[tbl].filter((item) => item.id !== id),
     }));
-    router.refresh()
+    refreshSite()
   };
 
   const handleEdit = async (id, table, updatedData, tbl) => {
@@ -196,7 +236,7 @@ const Page = () => {
         ),
       }));
       setModalOpenEdit(false);
-      router.refresh()
+      refreshSite()
     }
   };
 
