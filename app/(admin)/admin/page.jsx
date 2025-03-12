@@ -519,9 +519,9 @@ const Page = () => {
                   : addMaterial
               }
               disabled={
-                !items["Продукты"].some(
-                  (pim) => pim.katolog_id == selectedCatalogM
-                )
+               modalType === "Материалы" ?  !items["Продукты"].some(
+                (pim) => pim.katolog_id == selectedCatalogM
+              ) : false
               }
             >
               Сохранить
