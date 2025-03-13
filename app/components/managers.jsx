@@ -109,7 +109,10 @@ function Managers() {
                       </p>
                       <Link
                         className="uppercase mt-auto text-blue-400 font-bold hover:opacity-70"
-                        href={`/${katalogId}/${product.id}/${materials.find((imn)=> imn.product_id == product.id)?.id}`}
+                        
+                        href={
+                          materials.filter((imn) => imn.product_id === product.id).length !== 0 ? `/${katalogId}/${product.id}/${materials.find((imn)=> imn.product_id == product.id)?.id}` : '#' 
+                        }
                       >
                         {materials.filter((imn) => imn.product_id === product.id).length} статьи
                       </Link>

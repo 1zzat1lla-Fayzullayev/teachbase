@@ -117,8 +117,8 @@ function Navbar() {
           <div className="px-6 fixed w-full left-0 top-0 py-[15px] border-b border-b-[#9ca3af33] flex justify-between items-center z-[999] backdrop-blur-[40px]">
             <Link href="/">
               <img
-                src={theme == "light" ? "/lightLogo.svg" : "/logo.svg"}
-                className="cursor-pointer"
+                src={"/logo_2.png"}
+                className="cursor-pointer w-[142px] h-8"
                 alt="Logo"
               />
             </Link>
