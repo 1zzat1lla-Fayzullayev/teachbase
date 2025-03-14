@@ -649,7 +649,7 @@ const Page = () => {
             disabled={activeTable === "Материалы"}
             onChange={(e) => setEditedItem((prev) => ({ ...prev, katolog_id: e.target.value }))}
           >
-            <option value="">Выберите каталог</option>
+            {/* <option value="">Выберите каталог</option> */}
             {items["Каталог"].map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.title}</option>
             ))}
@@ -672,7 +672,7 @@ const Page = () => {
                   }));
                 }}
               >
-                <option value="">Выберите продукт</option>
+                {/* <option value="">Выберите продукт</option> */}
                 {items["Продукты"]
                   .filter((prod) => prod.katolog_id == editedItem.katolog_id)
                   .map((product) => (
