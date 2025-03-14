@@ -2,13 +2,11 @@
 import { supabase } from "@/app/supabase/store";
 import { EditIcon, TrashIcon, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 
 const Page = () => {
   const [userPassword, setUserPassword] = useState("");
   const [activeTable, setActiveTable] = useState(null);
-  const [activeItemId, setActiveItemId] = useState();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpenEdit, setModalOpenEdit] = useState(false);
   const [modalType, setModalType] = useState("");
@@ -26,7 +24,6 @@ const Page = () => {
     Материалы: [],
   });
   const refInput = useRef(null);
-  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,7 +31,8 @@ const Page = () => {
   const [filteredItems2, setFilteredItems] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
 
-  // const loggedIn = userPassword === "admin123";
+  const [editedItem, setEditedItem] = useState({});
+
 
   useEffect(() => {
     function login(userPassword) {
@@ -113,6 +111,18 @@ const Page = () => {
       )
     );
   }, [searchQuery, items, activeTable]);
+
+  const activeItem = items[activeTable]?.find(
+    (item) => item.id == activeItemId2
+  );
+
+
+  useEffect(() => {
+    if (activeItem) {
+      setEditedItem(activeItem);
+    }
+  }, [activeItemId2, activeItem]);
+  
 
   const addCatalog = async () => {
     if (!newItem.trim()) return;
@@ -215,11 +225,12 @@ const Page = () => {
     refreshSite();
   };
 
-  const handleEdit2 = async (id, table, updatedData, tbl) => {
+  const handleEdit = async (id, table, updatedData, tbl) => {
     const { data, error } = await supabase
       .from(tbl)
       .update(updatedData)
       .eq("id", id);
+
     if (!error) {
       setItems((prev) => ({
         ...prev,
@@ -227,44 +238,25 @@ const Page = () => {
           item.id == id ? { ...item, ...updatedData } : item
         ),
       }));
+
+      // If updating a product and catalog_id is included, update materials
+      if (tbl === "product" && updatedData.katolog_id) {
+        const { error: materialError } = await supabase
+          .from("material")
+          .update({ katolog_id: updatedData.katolog_id })
+          .eq("product_id", id);
+
+        if (materialError) {
+          console.error("Error updating materials:", materialError.message);
+        }
+      }
+
       setModalOpenEdit(false);
       refreshSite();
+    } else {
+      console.error("Error updating:", error.message);
     }
   };
-
-  const handleEdit = async (id, table, updatedData, tbl) => {
-    const { data, error } = await supabase
-        .from(tbl)
-        .update(updatedData)
-        .eq("id", id);
-
-    if (!error) {
-        setItems((prev) => ({
-            ...prev,
-            [table]: prev[table].map((item) =>
-                item.id == id ? { ...item, ...updatedData } : item
-            ),
-        }));
-
-        // If updating a product and catalog_id is included, update materials
-        if (tbl === "product" && updatedData.katolog_id) {
-            const { error: materialError } = await supabase
-                .from("material")
-                .update({ katolog_id: updatedData.katolog_id })
-                .eq("product_id", id);
-
-            if (materialError) {
-                console.error("Error updating materials:", materialError.message);
-            }
-        }
-
-        setModalOpenEdit(false);
-        refreshSite();
-    } else {
-        console.error("Error updating:", error.message);
-    }
-};
-
 
   const filterData = () => {
     if (activeTable === "Продукты") {
@@ -281,31 +273,7 @@ const Page = () => {
     return [];
   };
 
-  const filterData2 = (
-    activeTab,
-    catalogId,
-    productId,
-    products,
-    materials
-  ) => {
-    if (activeTab === "Продукты") {
-      // Filter products based on the selected catalog
-      return products.filter((product) => product.katolog_id === catalogId);
-    } else if (activeTab === "Материалы") {
-      // Filter materials based on both catalog and product
-      return materials.filter(
-        (material) =>
-          material.katolog_id === catalogId && material.product_id === productId
-      );
-    }
-    return [];
-  };
-
   const filteredItems = filterData();
-
-  const activeItem = items[activeTable]?.find(
-    (item) => item.id == activeItemId2
-  );
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -563,7 +531,7 @@ const Page = () => {
                     onChange={(e) => setSelectedPrdM(e.target.value)}
                   >
                     <option value="">Выберите продукт</option>
-                  
+
                     {items["Продукты"]
                       .filter((pim) => pim.katolog_id == selectedCatalogM) // ✅ Corrected condition
                       .map((cat) => (
@@ -604,410 +572,139 @@ const Page = () => {
         </div>
       )}
 
-      {/* {modalOpenEdit && (
-        <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md text-white">
-            <div className="flex flex-row justify-between">
-              <h2 className="text-lg font-bold mb-4">
-                Редактировать {activeTable}
-              </h2>
-              <X
-                onClick={() => setModalOpenEdit(false)}
-                className="mt-1 w-5 h-5 cursor-pointer"
-              />
-            </div>
-            {items[activeTable]?.length > 0 && (
-              <>
-                
-                <select
-                  className="w-full p-2 border rounded bg-gray-800 text-white"
-                  value={activeItemId}
-                  onChange={(e) => setActiveItemId(e.target.value)}
-                >
-                  <option value="">Выберите элемент</option>
-                  {items[activeTable].map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.title}
-                    </option>
-                  ))}
-                </select>
+{(modalOpenEdit) && (
+  <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
+    <div className="bg-gray-800 p-6 h-[calc(100vh-85px)] no-scroll overflow-auto rounded-lg w-full max-w-md text-white">
+      <div className="flex flex-row justify-between">
+        <h2 className="text-lg font-bold mb-4">Редактировать {activeTable}</h2>
+        <X onClick={() => setModalOpenEdit(false)} className="mt-1 w-5 h-5 cursor-pointer" />
+      </div>
 
-                <hr className="my-3" />
-              </>
-            )}
+      <input
+        type="text"
+        placeholder="Поиск..."
+        className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white mb-3"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
 
-            {activeItemId && (
-              <>
-                {(() => {
-                  const activeItem = items[activeTable]?.find(
-                    (item) => item.id == activeItemId
-                  );
-
-                  if (!activeItem) return null;
-
-                  return (
-                    <>
-                      <p>Заголовок</p>
-                      <input
-                        type="text"
-                        placeholder="..."
-                        className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                        value={activeItem.title || ""}
-                        onChange={(e) =>
-                          setItems((prevItems) => ({
-                            ...prevItems,
-                            [activeTable]: prevItems[activeTable].map((item) =>
-                              item.id == activeItemId
-                                ? { ...item, title: e.target.value }
-                                : item
-                            ),
-                          }))
-                        }
-                      />
-
-                      {activeTable === "Продукты" && (
-                        <>
-                          <p>Описание</p>
-                          <input
-                            type="text"
-                            placeholder="Описание"
-                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                            value={activeItem.description || ""}
-                            onChange={(e) =>
-                              setItems((prevItems) => ({
-                                ...prevItems,
-                                [activeTable]: prevItems[activeTable].map(
-                                  (item) =>
-                                    item.id == activeItemId
-                                      ? { ...item, description: e.target.value }
-                                      : item
-                                ),
-                              }))
-                            }
-                          />
-                        </>
-                      )}
-
-                      {activeTable === "Материалы" && (
-                        <>
-                          <p>Содержимое</p>
-                          <textarea
-                            type="text"
-                            placeholder="Содержимое"
-                            className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={activeItem.content || ""}
-                            onChange={(e) =>
-                              setItems((prevItems) => ({
-                                ...prevItems,
-                                [activeTable]: prevItems[activeTable].map(
-                                  (item) =>
-                                    item.id == activeItemId
-                                      ? { ...item, content: e.target.value }
-                                      : item
-                                ),
-                              }))
-                            }
-                          />
-                        </>
-                      )}
-
-                      {activeTable !== "Каталог" && (
-                        <>
-                          <p>Каталог</p>
-                          <select
-                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                            value={activeItem.katolog_id || ""}
-                            onChange={(e) =>
-                              setItems((prevItems) => ({
-                                ...prevItems,
-                                [activeTable]: prevItems[activeTable].map(
-                                  (item) =>
-                                    item.id == activeItemId
-                                      ? { ...item, katolog_id: e.target.value }
-                                      : item
-                                ),
-                              }))
-                            }
-                          >
-                            <option value="">Выберите каталог</option>
-                            {items["Каталог"].map((cat) => (
-                              <option key={cat.id} value={cat.id}>
-                                {cat.title}
-                              </option>
-                            ))}
-                          </select>
-
-                          <p>Продукт</p>
-                          <select
-                            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                            value={activeItem.product_id || ""}
-                            onChange={(e) =>
-                              setItems((prevItems) => ({
-                                ...prevItems,
-                                [activeTable]: prevItems[activeTable].map(
-                                  (item) =>
-                                    item.id == activeItemId
-                                      ? { ...item, product_id: e.target.value }
-                                      : item
-                                ),
-                              }))
-                            }
-                          >
-                            <option value="">Выберите продукт</option>
-                            {items["Продукты"].map((product) => (
-                              <option key={product.id} value={product.id}>
-                                {product.title}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      )}
-
-                      <button
-                        className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
-                        onClick={() =>
-                          handleEdit(
-                            activeItemId,
-                            activeTable,
-                            activeItem,
-                            activeTable === "Каталог"
-                              ? "katalog"
-                              : activeTable === "Продукты"
-                              ? "product"
-                              : "material"
-                          )
-                        }
-                      >
-                        Сохранить
-                      </button>
-                      <button
-                        className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
-                        onClick={() => setModalOpenEdit(false)}
-                      >
-                        Отмена
-                      </button>
-                    </>
-                  );
-                })()}
-              </>
-            )}
-          </div>
-        </div>
-      )} */}
-
-      {modalOpenEdit && (
-        <div className="fixed top-[65px] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-          <div className="bg-gray-800 p-6 h-[calc(100vh-85px)] no-scroll overflow-auto rounded-lg w-full max-w-md text-white">
-            <div className="flex flex-row justify-between">
-              <h2 className="text-lg font-bold mb-4">
-                Редактировать {activeTable}
-              </h2>
-              <X
-                onClick={() => setModalOpenEdit(false)}
-                className="mt-1 w-5 h-5 cursor-pointer"
-              />
-            </div>
-
-            {/* Search Input */}
-            <input
-              type="text"
-              placeholder="Поиск..."
-              className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white mb-3"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-
-            {/* Select an Item to Edit */}
-            {filteredItems2.length > 0 && (
-              <select
-                className="w-full p-2 border rounded bg-gray-800 text-white"
-                value={activeItemId2}
-                onChange={(e) => setActiveItemId2(e.target.value)}
-              >
-                <option value="">Выберите элемент</option>
-                {filteredItems2.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.title}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <hr className="my-3" />
-
-            {/* Edit Form */}
-            {activeItem && (
-              <>
-                <p>Заголовок</p>
-                <input
-                  type="text"
-                  placeholder="..."
-                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                  value={activeItem.title || ""}
-                  onChange={(e) =>
-                    setItems((prev) => ({
-                      ...prev,
-                      [activeTable]: prev[activeTable].map((item) =>
-                        item.id == activeItemId2
-                          ? { ...item, title: e.target.value }
-                          : item
-                      ),
-                    }))
-                  }
-                />
-
-                {/* Product Description */}
-                {activeTable === "Продукты" && (
-                  <>
-                    <p>Описание</p>
-                    <input
-                      type="text"
-                      placeholder="Описание"
-                      className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                      value={activeItem.description || ""}
-                      onChange={(e) =>
-                        setItems((prev) => ({
-                          ...prev,
-                          [activeTable]: prev[activeTable].map((item) =>
-                            item.id == activeItemId2
-                              ? { ...item, description: e.target.value }
-                              : item
-                          ),
-                        }))
-                      }
-                    />
-                  </>
-                )}
-
-                {/* Material Content */}
-                {activeTable === "Материалы" && (
-                  <>
-                    <p>Содержимое</p>
-                    <textarea
-                      className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none"
-                      value={activeItem.content || ""}
-                      onChange={(e) =>
-                        setItems((prev) => ({
-                          ...prev,
-                          [activeTable]: prev[activeTable].map((item) =>
-                            item.id == activeItemId2
-                              ? { ...item, content: e.target.value }
-                              : item
-                          ),
-                        }))
-                      }
-                    />
-                  </>
-                )}
-
-                {/* Select Catalog */}
-                {activeTable !== "Каталог" && (
-                  <>
-                    <p>Каталог</p>
-                    <select
-                      className="w-full p-2 border disabled:cursor-not-allowed disabled:opacity-30 rounded mb-4 bg-gray-800 text-white"
-                      value={activeItem.katolog_id || ""}
-                      disabled={activeTable === "Материалы"}
-                      onChange={(e) =>
-                        setItems((prev) => ({
-                          ...prev,
-                          [activeTable]: prev[activeTable].map((item) =>
-                            item.id == activeItemId2
-                              ? { ...item, katolog_id: e.target.value }
-                              : item
-                          ),
-                        }))
-                      }
-                    >
-                      <option value="">Выберите каталог</option>
-                      {items["Каталог"].map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.title}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Select Product */}
-                   {
-                    activeTable === "Материалы" && (
-                      <>
-                       <p>Продукт</p>
-                <select
-                  className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
-                  value={activeItem.product_id || ""}
-                  // onChange={(e) =>
-                  //   setItems((prev) => ({
-                  //     ...prev,
-                  //     [activeTable]: prev[activeTable].map((item) =>
-                  //       item.id == activeItemId2 ? { ...item, product_id: e.target.value } : item
-                  //     ),
-                  //   }))
-                  // }
-
-                  onChange={(e) => {
-                    const selectedProduct = items["Продукты"].find(
-                      (product) => product.id == e.target.value
-                    );
-        
-                    setItems((prev) => ({
-                      ...prev,
-                      [activeTable]: prev[activeTable].map((item) =>
-                        item.id == activeItemId2
-                          ? {
-                              ...item,
-                              product_id: e.target.value,
-                              katolog_id: selectedProduct?.katolog_id || "", // Auto-set katolog_id
-                            }
-                          : item
-                      ),
-                    }));
-                  }}
-        
-                >
-                  <option value="">Выберите продукт</option>
-                  {items["Продукты"]
-                    .filter((prod) => prod.katolog_id == activeItem.katolog_id) // Filter by selected catalog
-                    .map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.title}
-                      </option>
-                    ))}
-                </select>
-                      </>
-                    )
-                   }
-                  </>
-                )}
-
-                {/* Save / Cancel Buttons */}
-                <button
-                  className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
-                  onClick={() =>
-                    handleEdit(
-                      activeItemId2,
-                      activeTable,
-                      activeItem,
-                      activeTable === "Каталог"
-                        ? "katalog"
-                        : activeTable === "Продукты"
-                        ? "product"
-                        : "material"
-                    )
-                  }
-                >
-                  Сохранить
-                </button>
-                <button
-                  className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
-                  onClick={() => setModalOpenEdit(false)}
-                >
-                  Отмена
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+      {filteredItems2.length > 0 && (
+        <select
+          className="w-full p-2 border rounded bg-gray-800 text-white"
+          value={activeItemId2 || ""}
+          onChange={(e) => setActiveItemId2(e.target.value)}
+        >
+          <option value="">Выберите элемент</option>
+          {filteredItems2.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.title?.trim() || "Без названия"}
+            </option>
+          ))}
+        </select>
       )}
+
+      <hr className="my-3" />
+      {
+        activeItem && (
+          <>
+          <p>Заголовок</p>
+      <input
+        type="text"
+        placeholder="Введите заголовок"
+        className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+        value={editedItem.title || ""}
+        onChange={(e) => setEditedItem((prev) => ({ ...prev, title: e.target.value }))}
+      />
+
+      {activeTable === "Продукты" && (
+        <>
+          <p>Описание</p>
+          <input
+            type="text"
+            placeholder="Описание"
+            className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+            value={editedItem.description || ""}
+            onChange={(e) => setEditedItem((prev) => ({ ...prev, description: e.target.value }))}
+          />
+        </>
+      )}
+
+      {activeTable === "Материалы" && (
+        <>
+          <p>Содержимое</p>
+          <textarea
+            className="w-full h-40 p-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none"
+            value={editedItem.content || ""}
+            onChange={(e) => setEditedItem((prev) => ({ ...prev, content: e.target.value }))}
+          />
+        </>
+      )}
+
+      {activeTable !== "Каталог" && (
+        <>
+          <p>Каталог</p>
+          <select
+            className="w-full p-2 border disabled:cursor-not-allowed disabled:opacity-30 rounded mb-4 bg-gray-800 text-white"
+            value={editedItem.katolog_id || ""}
+            disabled={activeTable === "Материалы"}
+            onChange={(e) => setEditedItem((prev) => ({ ...prev, katolog_id: e.target.value }))}
+          >
+            <option value="">Выберите каталог</option>
+            {items["Каталог"].map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.title}</option>
+            ))}
+          </select>
+
+          {activeTable === "Материалы" && (
+            <>
+              <p>Продукт</p>
+              <select
+                className="w-full p-2 border rounded mb-4 bg-gray-800 text-white"
+                value={editedItem.product_id || ""}
+                onChange={(e) => {
+                  const selectedProduct = items["Продукты"].find(
+                    (product) => product.id == e.target.value
+                  );
+                  setEditedItem((prev) => ({
+                    ...prev,
+                    product_id: e.target.value,
+                    katolog_id: selectedProduct?.katolog_id || "",
+                  }));
+                }}
+              >
+                <option value="">Выберите продукт</option>
+                {items["Продукты"]
+                  .filter((prod) => prod.katolog_id == editedItem.katolog_id)
+                  .map((product) => (
+                    <option key={product.id} value={product.id}>{product.title}</option>
+                  ))}
+              </select>
+            </>
+          )}
+        </>
+      )}
+
+      <button
+        className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded-lg"
+        onClick={() => handleEdit(activeItemId2, activeTable, editedItem, activeTable === "Каталог" ? "katalog" : activeTable === "Продукты" ? "product" : "material")}
+      >
+        Сохранить
+      </button>
+      <button
+        className="px-4 py-2 cursor-pointer ml-2 bg-white text-blue-500 rounded-lg"
+        onClick={() => setModalOpenEdit(false)}
+      >
+        Отмена
+      </button>
+          </>
+        )
+      }
+      
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
